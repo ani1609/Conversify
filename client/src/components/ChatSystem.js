@@ -11,8 +11,10 @@ function ChatSystem()
 {
     const [showJoinCreateButtons, setShowJoinCreateButtons] = useState(true);
 	const [showJoinForm, setShowJoinForm] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false);
 	const [showChat, setShowChat]=useState(false);
     const [roomId, setRoomId] = useState('');
+    const [roomName, setRoomName] = useState('');
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     
 
@@ -58,30 +60,18 @@ function ChatSystem()
         if(userToken)
         {
             fetchDataFromProtectedAPI(userToken);
-            getRoomId(userToken);
+            // getRoomId(userToken);
         }
     }, []);
 
     const uploadRoomId = async (roomId, userToken) =>
     {
-        try
-        {
-            const config = {
-                headers: {
-                Authorization: `Bearer ${userToken}`,
-                },
-            };
-            const response = await axios.post("http://localhost:3000/api/user/uploadRoomId", { roomId }, config);
-            console.log(response.data.message);
-        }
-        catch (error)
-        {
-            console.error("Error fetching data:", error);
-        }
+        
     }
 
-    const handleCreateRoom = async () =>
+    const handleCreateRoom = async (e) =>
 	{
+        e.preventDefault();
 		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
 		let uniqueRoomId = '';
 	  
@@ -97,9 +87,30 @@ function ChatSystem()
 		socket.emit('create_room', uniqueRoomId);
 		console.log(uniqueRoomId);
 		setRoomId(uniqueRoomId);
-        uploadRoomId(uniqueRoomId, userToken);
+        try
+        {
+            const config = 
+            {
+                headers: 
+                {
+                    Authorization: `Bearer ${userToken}`,
+                },
+            };
+            const data = 
+            {
+                roomId: uniqueRoomId,
+                roomName: roomName,
+            };
+            const response = await axios.post("http://localhost:3000/api/chat/createRoom", data, config);
+            console.log(response.data.message);
+        }
+        catch (error)
+        {
+            console.error("Error fetching data:", error);
+        }
 		setShowJoinCreateButtons(false);
 		setShowChat(true);
+        setShowCreateForm(false);
 	};
   
     const handleJoinRoom = async (e) => 
@@ -107,7 +118,27 @@ function ChatSystem()
 		e.preventDefault();
         socket.emit('join_room', roomId);
 		console.log(roomId);
-        uploadRoomId(roomId, userToken);
+        try
+        {
+            const config = 
+            {
+                headers: 
+                {
+                    Authorization: `Bearer ${userToken}`,
+                },
+            };
+
+            const data =
+            {
+                roomId: roomId
+            };
+            const response = await axios.post("http://localhost:3000/api/chat/joinRoom", data, config);
+            console.log(response.data.message);
+        }
+        catch (error)
+        {
+            console.error("Error fetching data:", error);
+        }
 		setShowJoinCreateButtons(false);
 		setShowJoinForm(false);
 		setShowChat(true);
@@ -119,14 +150,28 @@ function ChatSystem()
         <div className='chatSystem_parent'>
             <div className='rooms_container'>
                 {showJoinCreateButtons && <div>
-                    <button onClick={handleCreateRoom}>Create Room</button>
+                    <button onClick={() => setShowCreateForm(true)}>Create Room</button>
                     <button onClick={() => setShowJoinForm(true)}>Join Room</button>
                 </div>}
 
-                {showJoinForm && <form onSubmit={handleJoinRoom}>
+                {showCreateForm && <form onSubmit={handleCreateRoom}>
+                    <label htmlFor="roomName">Enter Room Name</label>
                     <input
                         type='text'
-                        id="room"
+                        id="roomName"
+                        autoComplete="off"
+                        value={roomName}
+                        onChange={(e) => setRoomName(e.target.value)}
+                        required
+                    />
+                    <button type='submit'>Create Room</button>
+                </form>}
+
+                {showJoinForm && <form onSubmit={handleJoinRoom}>
+                    <label htmlFor="roomId">Enter Room Id</label>
+                    <input
+                        type='text'
+                        id="roomId"
                         autoComplete="off"
                         value={roomId}
                         onChange={(e) => setRoomId(e.target.value)}

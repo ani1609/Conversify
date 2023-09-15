@@ -56,7 +56,7 @@ function Chat(props)
 		}
 		try
 		{
-			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
+			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message, senderEmail: user.email, timeStamp: Date.now() });
 			console.log(response.data);
 		}
 		catch(error)

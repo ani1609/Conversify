@@ -1,7 +1,7 @@
 const express=require("express");
 const connectDb = require('./configDB/MongoDB');
 const {login, signup, authenticateJWT, uploadRoomId, getRoomId, editUserInfo, changePassword, deleteUsers}=require('./controllers/userController');
-const {uploadChat, getChat, deleteChats}=require('./controllers/chatRoomsController');
+const {createRoom, joinRoom, uploadChat, getChat, deleteChats}=require('./controllers/chatRoomController');
 const http=require('http');
 const{ Server }=require('socket.io');
 const cors=require('cors');
@@ -27,14 +27,13 @@ app.get('/api/user', authenticateJWT, (req, res) =>
 {
     res.json({ message: 'Protected route accessed successfully!', user: req.user });
 });
-app.post('/api/user/uploadRoomId', uploadRoomId);
-app.get('/api/user/getRoomId', getRoomId);
 
-
-// --------chat controllers--------
+// --------chatRoom controllers--------
 // deleteChats();
 app.post('/api/chat/upload', uploadChat);
 app.post('/api/chat/getChat', getChat);
+app.post('/api/chat/createRoom', createRoom);
+app.post('/api/chat/joinRoom', joinRoom);
 
 
 
