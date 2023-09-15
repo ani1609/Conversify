@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import axios from "axios";
 import '../index.css';
 import '../styles/Navbar.css';
-import { set } from 'mongoose';
 import {ReactComponent as Profile} from '../icons/profile.svg';
 
 function Navbar()
@@ -26,13 +25,7 @@ function Navbar()
     const [user, setUser] = useState({});
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [profileDropDown, setProfileDropDown] = useState(false);
-
-
-
-    useEffect(() =>
-    {
-        console.log(user);
-    }, [user]);
+    
 
     const fetchDataFromProtectedAPI = async (userToken) => 
     {
@@ -51,6 +44,14 @@ function Navbar()
             console.error("Error fetching data:", error);
         }
     };
+
+    useEffect(() =>
+    {
+        if(userToken)
+        {
+            fetchDataFromProtectedAPI(userToken);
+        }
+    }, []);
 
     const handleLogin = async (e) =>
     {
@@ -127,11 +128,12 @@ function Navbar()
     return(
         <div className='navbar_parent'>
             <a href=''>Chat</a>
+            {user?.name && <p>{user.name}</p>}
             <ul className='nav_tabs'>
                 {!userToken && <li onClick={()=>setShowLoginForm(true)}>Log in</li>}
                 {!userToken && <li onClick={()=>setShowSignupForm(true)}>Sign up</li>}
                 {userToken && <li onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(true)}>
-                    {user.profilePic ?
+                    {user?.profilePic ?
                         <img src={user.profilePic} alt='profile pic' />
                         :
                         <Profile className='profile_icon'/>

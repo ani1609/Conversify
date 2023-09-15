@@ -3,22 +3,32 @@ const Joi=require('joi');
 
 const userSchema = new mongoose.Schema(
 {
-    name: {
+    name: 
+    {
         type: String,
         required: true,
     },
-    email: {
+    email: 
+    {
         type: String,
-        required: true,
+        required: true, 
         unique: true,
     },
-    password: {
+    password: 
+    {
         type: String,
         required: true,
     },
-    profilePic: {
+    profilePic: 
+    {
         type: String,
     },
+    chatRooms:
+    [{
+        roomId: {
+        type: String,
+        },
+    },],
 });
 
 const User = mongoose.model('User', userSchema);

@@ -1,20 +1,42 @@
 import { useEffect, useState } from 'react';
+import axios from "axios";
 import '../index.css';
 import '../styles/Chat.css';
-import io from 'socket.io-client';
-const socket=io.connect("http://localhost:3000");
 
 
-function Chat() 
+function Chat(props) 
 {
-  	const [showJoinCreateButtons, setShowJoinCreateButtons] = useState(true);
-	const [showJoinForm, setShowJoinForm] = useState(false);
-	const [showChat, setShowChat]=useState(false);
-    const [roomId, setRoomId] = useState('');
+	const { roomId, socket } = props;
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
+	const [user, setUser] = useState({});
 
-  
+	const fetchDataFromProtectedAPI = async (userToken) => 
+    {
+        try 
+        {
+            const config = {
+                headers: {
+                Authorization: `Bearer ${userToken}`,
+                },
+            };
+            const response = await axios.get("http://localhost:3000/api/user", config);
+			// console.log("user is ", response.data.user);
+            setUser(response.data.user);
+        }
+        catch (error)
+        {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+	useEffect(() =>
+	{
+		const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
+		fetchDataFromProtectedAPI(userToken);
+	}, []);
+
+
 	useEffect(() => 
 	{
 		socket.on('receive_message', (data) => 
@@ -22,93 +44,45 @@ function Chat()
 			setMessages(prevMessages => [...prevMessages, data.message]);
 		});
 	}, [socket]);
+
   
-    const handleSendMessage = (e) => 
+    const handleSendMessage = async (e) => 
     {
         e.preventDefault();
-        if (message) 
+        if (message && user && user.name) 
 		{
-			socket.emit('send_message', { roomId, message });
+			socket.emit('send_message', { roomId, message, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
 			setMessage('');
 		}
-    };
-
-	const generateRoomId = () => 
-	{
-		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
-		let roomId = '';
-	  
-		for (let i = 0; i < 9; i++) 
+		try
 		{
-		  	const randomIndex = Math.floor(Math.random() * characters.length);
-		  	if (i==3 || i==6)
-		  	{
-		  		roomId = roomId + '-';
-		  	}
-		  	roomId = roomId + characters[randomIndex];
+			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
+			console.log(response.data);
 		}
-		return roomId;
-	}
-	  
-	const handleCreateRoom = () =>
-	{
-		const uniqueRoomId = generateRoomId();
-		socket.emit('create_room', uniqueRoomId);
-		console.log(uniqueRoomId);
-		setRoomId(uniqueRoomId);
-		setShowJoinCreateButtons(false);
-		setShowChat(true);
-	};
-  
-    const handleJoinRoom = (e) => 
-    {
-		e.preventDefault();
-        socket.emit('join_room', roomId);
-		console.log(roomId);
-		setShowJoinCreateButtons(false);
-		setShowJoinForm(false);
-		setShowChat(true);
+		catch(error)
+		{
+			console.error(error);
+		}
     };
 
-  
     return (
       	<div>
-			{showJoinCreateButtons && <div>
-				<button onClick={handleCreateRoom}>Create Room</button>
-				<button onClick={() => setShowJoinForm(true)}>Join Room</button>
-			</div>}
-
-			{showJoinForm && <form onSubmit={handleJoinRoom}>
+			<form>
+			{messages.filter((_, index) => index % 2 === 0).map((msg, index) => (
+				<div key={index} className='message'>
+					<p>{msg}</p>
+				</div>
+			))}
 				<input
 					type='text'
-					id="room"
+					id="message"
 					autoComplete="off"
-					value={roomId}
-					onChange={(e) => setRoomId(e.target.value)}
+					value={message}
+					onChange={(e) => setMessage(e.target.value)}
 					required
 				/>
-				<button type='submit'>Join Room</button>
-			</form>}
-
-			{showChat && <div>
-				<form>
-					{messages.filter((msg, index) => index % 2 === 0).map((msg, index) => (
-						<div key={index} className='message'>
-							<p>{msg}</p>
-						</div>
-					))}
-					<input
-						type='text'
-						id="message"
-						autoComplete="off"
-						value={message}
-						onChange={(e) => setMessage(e.target.value)}
-						required
-					/>
-					<button type='submit' onClick={handleSendMessage}>Send</button>
-				</form>
-			</div>
-			}
+				<button type='submit' onClick={handleSendMessage}>Send</button>
+			</form>
     	</div>
     );
 }
