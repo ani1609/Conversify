@@ -1,12 +1,12 @@
 import '../styles/App.css';
 import Navbar from '../components/Navbar.js';
-import Chat from './Chat.js';
+import ChatSystem from './ChatSystem.js';
 
 function App() {
   return (
     <div className="App">
       <Navbar/>
-      {/* <Chat/> */}
+      <ChatSystem/>
     </div>
   );
 }

@@ -82,6 +82,52 @@ function authenticateJWT(req, res, next)
     });
 }
 
+const uploadRoomId = async (req, res) =>
+{
+    try
+    {
+        console.log("got upload room id request");
+        const { roomId } = req.body;
+        console.log(roomId);
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const user = await User.findById(decoded.id);
+
+        const isRoomAlreadyAdded = user.chatRooms.some((room) => room.roomId === roomId);
+        if (isRoomAlreadyAdded) 
+        {
+            return res.status(201).send({ message: "Room Id already exists for the user" });
+        }
+
+        user.chatRooms.push({ roomId });
+        await user.save();
+        res.status(201).send({ message: "Room Id uploaded successfully" });
+    }
+    catch (error)
+    {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
+
+const getRoomId = async (req, res) =>
+{
+    try
+    {
+        console.log("got get room id request");
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const user = await User.findById(decoded.id);
+        const roomIds = user.chatRooms.map((room) => room.roomId);
+        res.status(200).send({ roomIds });
+    }
+    catch (error)
+    {
+        console.error(error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
+
 const editUserInfo = async (req, res) => {
     try 
     {
@@ -148,10 +194,26 @@ const changePassword = async (req, res) =>
 
 }
 
+const deleteUsers = async (req, res) =>
+{
+    try
+    {
+        await User.deleteMany({});
+        console.log("All users deleted");
+    }
+    catch (error)
+    {
+        console.log(error);
+    }
+}
+
 module.exports = {
     login,
     signup,
     authenticateJWT,
+    uploadRoomId,
+    getRoomId,
     editUserInfo,
-    changePassword
+    changePassword,
+    deleteUsers
 };
