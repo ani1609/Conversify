@@ -1,24 +1,5 @@
 const mongoose = require('mongoose');
 
-const chatSchema = new mongoose.Schema(
-{
-    senderEmail: 
-    {
-        type: String,
-        required: true,
-    },
-    message: 
-    {
-        type: String,
-        required: true,
-    },
-    timestamp: 
-    {
-        type: Date,
-        default: Date.now,
-    },
-});
-
 
 const chatRoomSchema = new mongoose.Schema(
 {
@@ -27,7 +8,58 @@ const chatRoomSchema = new mongoose.Schema(
         type: String,
         required: true,
     },
-    chats: [chatSchema],
+    creator:
+    {
+        type: String,
+        required: true,
+    },
+    roomName:
+    {
+        type: String,
+        required: true,
+    },
+    roomMembers: 
+    [
+        {
+            userEmail: {
+                type: String,
+                required: true,
+            },
+            joinTimestamp: {
+                type: Date,
+                default: Date.now,
+            },
+        },
+    ],
+    groupProfilePic:
+    {
+        type: String,
+    },
+    timestamp:
+    {
+        type: Date,
+        default: Date.now,
+    },
+    chats: 
+    [
+        {
+            senderEmail: 
+            {
+                type: String,
+                required: true,
+            },
+            message: 
+            {
+                type: String,
+                required: true,
+            },
+            timestamp: 
+            {
+                type: Date,
+                default: Date.now,
+            },
+        },
+    ],
 });
 
 const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);

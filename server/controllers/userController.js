@@ -86,7 +86,6 @@ const uploadRoomId = async (req, res) =>
 {
     try
     {
-        console.log("got upload room id request");
         const { roomId } = req.body;
         console.log(roomId);
         const token = req.headers.authorization.split(' ')[1];
@@ -114,7 +113,6 @@ const getRoomId = async (req, res) =>
 {
     try
     {
-        console.log("got get room id request");
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, SECRET_KEY);
         const user = await User.findById(decoded.id);
