@@ -4,6 +4,9 @@ import axios from "axios";
 import '../index.css';
 import '../styles/Navbar.css';
 import {ReactComponent as Profile} from '../icons/profile.svg';
+import * as openpgp from 'openpgp/lightweight';
+import { generateKey } from 'openpgp/lightweight';
+import { set } from 'mongoose';
 
 function Navbar()
 {
@@ -19,6 +22,8 @@ function Navbar()
     const [signupData, setSignupData] = useState({
         name: '',
         email: '',
+        armoredPublicKey: '',
+        encryptedPrivateKey: '',
         password: '',
         confirmPassword: ''
     });
@@ -38,6 +43,7 @@ function Navbar()
             };
             const response = await axios.get("http://localhost:3000/api/user", config);
             setUser(response.data.user);
+            console.log(response.data.user);
         }
         catch (error)
         {
@@ -52,6 +58,91 @@ function Navbar()
             fetchDataFromProtectedAPI(userToken);
         }
     }, []);
+
+    const generateKeyPair = async (user) =>
+    {
+        // const { privateKey, publicKey } = await openpgp.generateKey({
+        //     type: 'ecc', // Type of the key, defaults to ECC
+        //     curve: 'curve25519', // ECC curve name, defaults to curve25519
+        //     userIDs: [{ name: user.name, email: user.email }], // you can pass multiple user IDs
+        //     format: 'armored' // output key format, defaults to 'armored' (other options: 'binary' or 'object')
+        // });
+    
+        // console.log("armored private key \n",privateKey);    // '-----BEGIN PGP PRIVATE KEY BLOCK ... '
+        // console.log("armored public key \n",publicKey);    // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
+
+        // const actualPrivateKey = await openpgp.readPrivateKey({ armoredKey: privateKey });
+        // console.log("actual private key \n",actualPrivateKey);
+
+        const { privateKey, publicKey} = await openpgp.generateKey
+        ({
+            type: 'ecc', 
+            curve: 'curve25519', 
+            userIDs: [{ name: user.name, email: user.email }],
+            format: 'armored'
+        });
+
+        setSignupData({...signupData, armoredPublicKey: publicKey});
+        
+    
+        console.log("armored private key ",privateKey);
+        console.log("armored public key ",publicKey);
+
+        const actualPublicKey = await openpgp.readKey({ armoredKey: publicKey });
+        console.log("actual public key ",actualPublicKey);
+
+        const actualPrivateKey= await openpgp.readPrivateKey({ armoredKey: privateKey });
+        console.log("actual private key ",actualPrivateKey);
+
+        const passphrase = user.password;
+
+        const encryptedPrivateKey = await openpgp.encryptKey({
+            privateKey : actualPrivateKey,
+            passphrase : passphrase,
+        });
+
+        setSignupData({...signupData, encryptedPrivateKey: encryptedPrivateKey});
+
+        console.log("encrypted private key ",encryptedPrivateKey);
+
+
+        const encrypted = await openpgp.encrypt
+        ({
+            message: await openpgp.createMessage({ text: 'achha thik h' }),
+            encryptionKeys: actualPublicKey,
+        });
+        console.log("encrypted message",encrypted);
+
+
+        const message = await openpgp.readMessage({
+            armoredMessage: encrypted // parse armored message
+        });
+        console.log("parsed message",message);
+
+
+        const { data: decrypted} = await openpgp.decrypt({
+            message,
+            decryptionKeys: actualPrivateKey
+        });
+        console.log("decrypted message", decrypted); 
+
+        return { privateKey, publicKey };
+    }
+
+    useEffect(() =>
+    {
+        if (user)
+        {
+            console.log("user's name is ", user);
+            console.log("user's public key is ", user.armoredPublicKey);
+            console.log("user's private key is ", user.encryptedPrivateKey);
+        }
+        if(user?.name && user?.email)
+        {
+            const {privateKey, publicKey} = generateKeyPair(user);
+        }
+        
+    }, [user]);
 
     const handleLogin = async (e) =>
     {
@@ -83,6 +174,7 @@ function Navbar()
     const handleSignup = async (e) =>
     {
         e.preventDefault();
+        const { privateKey, publicKey } = await generateKeyPair(signupData);
         try
         {
             if(signupData.password !== signupData.confirmPassword)
@@ -91,7 +183,13 @@ function Navbar()
                 console.error('Passwords do not match');
                 return;
             }
-            const response = await axios.post('http://localhost:3000/api/users/signup', signupData);
+            const response = await axios.post('http://localhost:3000/api/users/signup', {
+                name: signupData.name,
+                email: signupData.email,
+                password: signupData.password,
+                armoredPublicKey: publicKey,
+                encryptedPrivateKey: privateKey,
+            });
             localStorage.setItem('chatUserToken', JSON.stringify(response.data.token));
             fetchDataFromProtectedAPI(response.data.token);
             setUserExists(false);
@@ -106,13 +204,14 @@ function Navbar()
         }
         catch(error)
         {
-            if (error.response.status === 409)
-            {
-                setUserExists(true);
-                console.error(error.response.data.message);
-                return;
-            }
-            console.error(error.response.data.message);
+            // if (error.response.status === 409)
+            // {
+            //     setUserExists(true);
+            //     console.error(error.response.data.message);
+            //     return;
+            // }
+            // console.error(error.response.data.message);
+            console.log(error);
         }
         setShowSignupForm(false);
     }

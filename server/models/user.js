@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const Joi=require('joi');
 
-const userSchema = new mongoose.Schema(
-{
+const userSchema = new mongoose.Schema
+({
     name: 
     {
         type: String,
@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     email: 
     {
         type: String,
-        required: true, 
+        required: true,
         unique: true,
     },
     password: 
@@ -23,12 +23,16 @@ const userSchema = new mongoose.Schema(
     {
         type: String,
     },
-    chatRooms:
-    [{
-        roomId: {
+    armoredPublicKey: 
+    {
         type: String,
-        },
-    },],
+        required: true,
+    },
+    encryptedPrivateKey:
+    {
+        type: String,
+        required: true,
+    },
 });
 
 const User = mongoose.model('User', userSchema);

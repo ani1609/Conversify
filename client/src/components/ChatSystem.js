@@ -64,11 +64,6 @@ function ChatSystem()
         }
     }, []);
 
-    const uploadRoomId = async (roomId, userToken) =>
-    {
-        
-    }
-
     const handleCreateRoom = async (e) =>
 	{
         e.preventDefault();

@@ -31,6 +31,7 @@ const login=async(req,res)=>
 const signup = async (req, res) => 
 {
     console.log("got signup request");
+    console.log(req.body);
     try
     {
         const user = await User.findOne({ email: req.body.email });
