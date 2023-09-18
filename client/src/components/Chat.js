@@ -8,6 +8,7 @@ function Chat(props)
 {
 	const { roomId, socket } = props;
     const [message, setMessage] = useState('');
+	const [previousMessages, setPreviousMessages] = useState([]);
     const [messages, setMessages] = useState([]);
 	const [user, setUser] = useState({});
 
@@ -36,15 +37,37 @@ function Chat(props)
 		fetchDataFromProtectedAPI(userToken);
 	}, []);
 
+	const getChats = async (roomId) =>
+	{
+		try
+		{
+			const response = await axios.post('http://localhost:3000/api/chat/getChat', { roomId });
+			console.log(response.data);
+			setPreviousMessages(response.data.chats);
+		}
+		catch(error)
+		{
+			console.error(error);
+		}
+	}
+
+	useEffect(() =>
+	{
+		if (roomId)
+		{
+			getChats(roomId);
+		}
+	}, [roomId]);
+
 
 	useEffect(() => 
 	{
 		socket.on('receive_message', (data) => 
 		{
-			setMessages(prevMessages => [...prevMessages, data.message]);
+		  	console.log("received message is", data);
+			setMessages((messages) => [...messages, data.data]);
 		});
-	}, [socket]);
-
+	  }, [socket]);
   
     const handleSendMessage = async (e) => 
     {
@@ -68,11 +91,20 @@ function Chat(props)
     return (
       	<div>
 			<form>
-			{messages.filter((_, index) => index % 2 === 0).map((msg, index) => (
-				<div key={index} className='message'>
-					<p>{msg}</p>
-				</div>
-			))}
+				{previousMessages.map((data, index) => (
+					<div key={index} className='previous_messages'>
+						<p>{data.message}</p>
+					</div>
+				))}
+
+				{messages.map((data, index) => (
+					<div key={index} className='message'>
+						<p>{data.message}</p>
+					</div>
+				))}
+
+				
+
 				<input
 					type='text'
 					id="message"

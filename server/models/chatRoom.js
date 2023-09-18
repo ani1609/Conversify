@@ -21,11 +21,18 @@ const chatRoomSchema = new mongoose.Schema(
     roomMembers: 
     [
         {
-            userEmail: {
+            userEmail: 
+            {
                 type: String,
                 required: true,
             },
-            joinTimestamp: {
+            armoredPublicKey:
+            {
+                type: String,
+                required: true,
+            },
+            joinTimestamp: 
+            {
                 type: Date,
                 default: Date.now,
             },

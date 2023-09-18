@@ -65,8 +65,8 @@ io.on('connection', (socket) =>
     //handle send message
     socket.on('send_message', (data) => 
     {
-        // console.log("received message is", data);
-        io.to(data.roomId).emit('receive_message', { message: data.message });
+        console.log("received message is", data);
+        io.to(data.roomId).emit('receive_message', { data: data});
     });
 
     socket.on('disconnect', () => 

@@ -22,7 +22,7 @@ const createRoom = async (req, res) =>
             roomId: req.body.roomId,
             creator: user.email,
             roomName: req.body.roomName,
-            roomMembers: [{ userEmail: user.email, joinTimestamp: Date.now() }],
+            roomMembers: [{ userEmail: user.email, armoredPublicKey : user.armoredPublicKey , joinTimestamp: Date.now() }],
         });
         await newRoom.save();
         res.status(201).json({ message: "Room created successfully" });
@@ -44,36 +44,36 @@ const createRoom = async (req, res) =>
 
 
 
-const joinRoom = async (req, res) => {
+const joinRoom = async (req, res) => 
+{
     try 
     {
-        const token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, SECRET_KEY);
-
-        // Find the chat room based on the roomId
         const room = await ChatRoom.findOne({ roomId: req.body.roomId });
 
         if (!room) {
             return res.status(404).json({ message: "Room not found" });
         }
 
-        // Find the user based on the decoded token
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, SECRET_KEY);
         const user = await User.findById(decoded.id);
 
-        if (!user) {
+        if (!user) 
+        {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Check if the user is already a member of the room
         const isMember = room.roomMembers.some((member) => member.userEmail === user.email);
-        if (!isMember) {
-            // Add the user to the room's members
-            room.roomMembers.push({ userEmail: user.email }); // Provide the joinTimestamp
+        if (!isMember) 
+        {
+            room.roomMembers.push({ userEmail: user.email, armoredPublicKey : user.armoredPublicKey , joinTimestamp: Date.now() });
             await room.save();
         }
 
         res.status(201).json({ message: "Room joined successfully" });
-    } catch (error) {
+    } 
+    catch (error) 
+    {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
@@ -112,7 +112,22 @@ const uploadChat = async (req, res) => {
 const getChat = async (req, res) =>
 {
     console.log(req.body);
+    const { roomId } = req.body;
     console.log("got get chat request");
+    try
+    {
+        const room = await ChatRoom.findOne({ roomId });
+        if (!room)
+        {
+            return res.status(404).json({ message: "Chat room not found" });
+        }
+        res.status(200).json({ chats: room.chats });
+
+    }
+    catch (error)
+    {
+        console.log(error);
+    }
 }
 
 const deleteChats = async (req, res) =>
