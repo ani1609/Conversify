@@ -4,6 +4,7 @@ import '../styles/ChatSystem.css';
 import Chat from './Chat.js';
 import axios from "axios";
 import io from 'socket.io-client';
+import { get, set } from 'mongoose';
 const socket=io.connect("http://localhost:3000");
 
 
@@ -15,7 +16,10 @@ function ChatSystem()
 	const [showChat, setShowChat]=useState(false);
     const [roomId, setRoomId] = useState('');
     const [roomName, setRoomName] = useState('');
+    const [roomMembers, setRoomMembers] = useState([]);
+    const [publicKeys, setPublicKeys] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
+    const [user, setUser] = useState({});
     
 
     const fetchDataFromProtectedAPI = async (userToken) => 
@@ -28,7 +32,7 @@ function ChatSystem()
                 },
             };
             const response = await axios.get("http://localhost:3000/api/user", config);
-            // setUser(response.data.user);
+            setUser(response.data.user);
         }
         catch (error)
         {
@@ -64,6 +68,30 @@ function ChatSystem()
         }
     }, []);
 
+    const getroomMembers = async (roomId) =>
+    {
+        try
+        {
+            const response = await axios.post('http://localhost:3000/api/chat/getRoomMembers', { roomId });
+            setRoomMembers(response.data.roomMembers);
+            const keys = response.data.roomMembers.map(member => member.armoredPublicKey);
+            setPublicKeys(keys);
+        }
+        catch(error)
+        {
+            console.error("Error in fetching room members ",error);
+        }
+    }
+
+    useEffect(() =>
+    {
+        if (roomId && roomId.length === 11)
+        {
+            getroomMembers(roomId);
+        }
+    }, [roomId]);
+
+
     const handleCreateRoom = async (e) =>
 	{
         e.preventDefault();
@@ -81,7 +109,6 @@ function ChatSystem()
 		}
 		socket.emit('create_room', uniqueRoomId);
 		console.log(uniqueRoomId);
-		setRoomId(uniqueRoomId);
         try
         {
             const config = 
@@ -97,6 +124,7 @@ function ChatSystem()
                 roomName: roomName,
             };
             const response = await axios.post("http://localhost:3000/api/chat/createRoom", data, config);
+		    setRoomId(uniqueRoomId);
             console.log(response.data.message);
         }
         catch (error)
@@ -107,11 +135,23 @@ function ChatSystem()
 		setShowChat(true);
         setShowCreateForm(false);
 	};
+
+
+    useEffect(() =>
+    {
+        socket.on('join_room', (data) =>
+        {
+            console.log("new user joined with data ",data);
+            setRoomMembers((roomMembers) => [...roomMembers, data.user]);
+            setPublicKeys((publicKeys) => [...publicKeys, data.user.armoredPublicKey]);
+        });
+    }, [socket]);
+
   
     const handleJoinRoom = async (e) => 
     {
 		e.preventDefault();
-        socket.emit('join_room', roomId);
+        socket.emit('join_room', { roomId, user});
 		console.log(roomId);
         try
         {
@@ -129,6 +169,7 @@ function ChatSystem()
             };
             const response = await axios.post("http://localhost:3000/api/chat/joinRoom", data, config);
             console.log(response.data.message);
+            getroomMembers(roomId);
         }
         catch (error)
         {
@@ -179,6 +220,9 @@ function ChatSystem()
                 <Chat
                     roomId={roomId}
                     socket={socket}
+                    roomMembers={roomMembers}
+                    publicKeys={publicKeys}
+                    user={user}
                 />
             }
         </div>

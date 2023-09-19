@@ -85,14 +85,14 @@ function Navbar()
         setSignupData({...signupData, armoredPublicKey: publicKey});
         
     
-        console.log("armored private key ",privateKey);
-        console.log("armored public key ",publicKey);
+        // console.log("armored private key ",privateKey);
+        // console.log("armored public key ",publicKey);
 
         const actualPublicKey = await openpgp.readKey({ armoredKey: publicKey });
-        console.log("actual public key ",actualPublicKey);
+        // console.log("actual public key ",actualPublicKey);
 
         const actualPrivateKey= await openpgp.readPrivateKey({ armoredKey: privateKey });
-        console.log("actual private key ",actualPrivateKey);
+        // console.log("actual private key ",actualPrivateKey);
 
         const passphrase = user.password;
 
@@ -103,7 +103,7 @@ function Navbar()
 
         setSignupData({...signupData, encryptedPrivateKey: encryptedPrivateKey});
 
-        console.log("encrypted private key ",encryptedPrivateKey);
+        // console.log("encrypted private key ",encryptedPrivateKey);
 
 
         const encrypted = await openpgp.encrypt
@@ -111,20 +111,20 @@ function Navbar()
             message: await openpgp.createMessage({ text: 'achha thik h' }),
             encryptionKeys: actualPublicKey,
         });
-        console.log("encrypted message",encrypted);
+        // console.log("encrypted message",encrypted);
 
 
         const message = await openpgp.readMessage({
             armoredMessage: encrypted // parse armored message
         });
-        console.log("parsed message",message);
+        // console.log("parsed message",message);
 
 
         const { data: decrypted} = await openpgp.decrypt({
             message,
             decryptionKeys: actualPrivateKey
         });
-        console.log("decrypted message", decrypted); 
+        // console.log("decrypted message", decrypted); 
 
         return { privateKey, publicKey };
     }
@@ -133,9 +133,9 @@ function Navbar()
     {
         if (user)
         {
-            console.log("user's name is ", user);
-            console.log("user's public key is ", user.armoredPublicKey);
-            console.log("user's private key is ", user.encryptedPrivateKey);
+            // console.log("user's name is ", user);
+            // console.log("user's public key is ", user.armoredPublicKey);
+            // console.log("user's private key is ", user.encryptedPrivateKey);
         }
         if(user?.name && user?.email)
         {
