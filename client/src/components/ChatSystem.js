@@ -141,7 +141,7 @@ function ChatSystem()
     {
         socket.on('join_room', (data) =>
         {
-            console.log("new user joined with data ",data);
+            console.log(data.user.name," joined the chat");
             setRoomMembers((roomMembers) => [...roomMembers, data.user]);
             setPublicKeys((publicKeys) => [...publicKeys, data.user.armoredPublicKey]);
         });
