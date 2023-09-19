@@ -158,6 +158,7 @@ function Navbar()
                 email: '',
                 password: ''
             });
+            window.location.reload();
         }
         catch(error)
         {
@@ -201,6 +202,7 @@ function Navbar()
                 password: '',
                 confirmPassword: ''
             });
+            window.location.reload();
         }
         catch(error)
         {

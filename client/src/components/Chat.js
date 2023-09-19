@@ -26,7 +26,7 @@ function Chat(props)
 		}
 		catch(error)
 		{
-			console.error("Error in decrypting message ",error);
+			// console.error("Error in decrypting message ",error);
 		}
 	}
 	
@@ -74,9 +74,9 @@ function Chat(props)
     {
         e.preventDefault();
 		let encrypted;
-        if (plainText && user && user.name) 
+        if (plainText && user && user.name && publicKeys) 
 		{
-			const unArmoredPublicKeys = await Promise.all(publicKeys.map(armoredKey => openpgp.readKey({ armoredKey })));
+			const unArmoredPublicKeys = await Promise.all(publicKeys.map(armoredKey => openpgp.readKey({ armoredKey : armoredKey })));
 			const message = await openpgp.createMessage({ text: plainText });
     		encrypted = await openpgp.encrypt({
 				message,
