@@ -2,52 +2,51 @@ import { useEffect, useState } from 'react';
 import axios from "axios";
 import '../index.css';
 import '../styles/Chat.css';
+import * as openpgp from 'openpgp/lightweight';
 
 
 function Chat(props) 
 {
-	const { roomId, socket } = props;
-    const [message, setMessage] = useState('');
+	const { roomId, socket, roomMembers, publicKeys, user } = props;
+    const [plainText, setPlainText] = useState('');
 	const [previousMessages, setPreviousMessages] = useState([]);
     const [messages, setMessages] = useState([]);
-	const [user, setUser] = useState({});
 
-	const fetchDataFromProtectedAPI = async (userToken) => 
-    {
-        try 
-        {
-            const config = {
-                headers: {
-                Authorization: `Bearer ${userToken}`,
-                },
-            };
-            const response = await axios.get("http://localhost:3000/api/user", config);
-			// console.log("user is ", response.data.user);
-            setUser(response.data.user);
-        }
-        catch (error)
-        {
-            console.error("Error fetching data:", error);
-        }
-    };
 
-	useEffect(() =>
+	const decryptMessages = async (message) =>
 	{
-		const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
-		fetchDataFromProtectedAPI(userToken);
-	}, []);
+		try
+		{
+			const { data: decrypted } = await openpgp.decrypt
+			({
+				message: await openpgp.readMessage({ armoredMessage: message }),
+				decryptionKeys: await openpgp.readPrivateKey({ armoredKey: user.encryptedPrivateKey }),
+			});
+			return decrypted;
+		}
+		catch(error)
+		{
+			console.error("Error in decrypting message ",error);
+		}
+	}
+	
 
 	const getChats = async (roomId) =>
 	{
 		try
 		{
 			const response = await axios.post('http://localhost:3000/api/chat/getChat', { roomId });
-			console.log(response.data);
-			setPreviousMessages(response.data.chats);
+			const decrypted = await Promise.all(response.data.chats.map(chat => decryptMessages(chat.message)));
+			const chats = response.data.chats.map((chat, index) =>
+			{
+				chat.message = decrypted[index];
+				return chat;
+			});
+			setPreviousMessages(chats);
 		}
 		catch(error)
 		{
-			console.error(error);
+			console.error("Error is fetching previous chats ",error);
 		}
 	}
 
@@ -62,29 +61,38 @@ function Chat(props)
 
 	useEffect(() => 
 	{
-		socket.on('receive_message', (data) => 
+		socket.on('receive_message', async (data) => 
 		{
-		  	console.log("received message is", data);
+			const decrypted = await decryptMessages(data.data.message);
+			data.data.message = decrypted;
 			setMessages((messages) => [...messages, data.data]);
 		});
-	  }, [socket]);
+	}, [socket]);
+
   
     const handleSendMessage = async (e) => 
     {
         e.preventDefault();
-        if (message && user && user.name) 
+		let encrypted;
+        if (plainText && user && user.name) 
 		{
-			socket.emit('send_message', { roomId, message, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
-			setMessage('');
+			const unArmoredPublicKeys = await Promise.all(publicKeys.map(armoredKey => openpgp.readKey({ armoredKey })));
+			const message = await openpgp.createMessage({ text: plainText });
+    		encrypted = await openpgp.encrypt({
+				message,
+				encryptionKeys: unArmoredPublicKeys,
+			});
+			socket.emit('send_message', { roomId, message : encrypted, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
+			setPlainText('');
 		}
 		try
 		{
-			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message, senderEmail: user.email, timeStamp: Date.now() });
+			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message : encrypted, senderEmail: user.email, timeStamp: Date.now() });
 			console.log(response.data);
 		}
 		catch(error)
 		{
-			console.error(error);
+			console.error("Error in sending message ",error);
 		}
     };
 
@@ -109,8 +117,8 @@ function Chat(props)
 					type='text'
 					id="message"
 					autoComplete="off"
-					value={message}
-					onChange={(e) => setMessage(e.target.value)}
+					value={plainText}
+					onChange={(e) => setPlainText(e.target.value)}
 					required
 				/>
 				<button type='submit' onClick={handleSendMessage}>Send</button>

@@ -43,7 +43,6 @@ const createRoom = async (req, res) =>
 };
 
 
-
 const joinRoom = async (req, res) => 
 {
     try 
@@ -80,6 +79,26 @@ const joinRoom = async (req, res) =>
 };
 
 
+const getRoomMembers = async (req, res) =>
+{
+    try
+    {
+        const room = await ChatRoom.findOne({ roomId: req.body.roomId });
+        if (!room)
+        {
+            return res.status(404).json({ message: "Room not found" });
+        }
+        console.log(room);
+        res.status(200).json({ roomMembers: room.roomMembers });
+    }
+    catch (error)
+    {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+
 const uploadChat = async (req, res) => {
     try 
     {
@@ -111,9 +130,7 @@ const uploadChat = async (req, res) => {
 
 const getChat = async (req, res) =>
 {
-    console.log(req.body);
     const { roomId } = req.body;
-    console.log("got get chat request");
     try
     {
         const room = await ChatRoom.findOne({ roomId });
@@ -148,6 +165,7 @@ const deleteChats = async (req, res) =>
 module.exports = { 
     createRoom,
     joinRoom,
+    getRoomMembers,
     uploadChat,
     getChat,
     deleteChats

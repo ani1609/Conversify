@@ -1,7 +1,7 @@
 const express=require("express");
 const connectDb = require('./configDB/MongoDB');
 const {login, signup, authenticateJWT, uploadRoomId, getRoomId, editUserInfo, changePassword, deleteUsers}=require('./controllers/userController');
-const {createRoom, joinRoom, uploadChat, getChat, deleteChats}=require('./controllers/chatRoomController');
+const {createRoom, joinRoom, getRoomMembers, uploadChat, getChat, deleteChats}=require('./controllers/chatRoomController');
 const http=require('http');
 const{ Server }=require('socket.io');
 const cors=require('cors');
@@ -34,6 +34,7 @@ app.post('/api/chat/upload', uploadChat);
 app.post('/api/chat/getChat', getChat);
 app.post('/api/chat/createRoom', createRoom);
 app.post('/api/chat/joinRoom', joinRoom);
+app.post('/api/chat/getRoomMembers', getRoomMembers);
 
 
 
@@ -55,11 +56,12 @@ io.on('connection', (socket) =>
         console.log(`User created and joined a room: ${roomId}`);
     });
 
-    // Handle joining room
-    socket.on('join_room', (roomId) => 
+    // Handle new user joining room
+    socket.on('join_room', (data) => 
     {
-        socket.join(roomId);
-        console.log(`User joined a room: ${roomId}`);
+        socket.join(data.roomId);
+        socket.broadcast.to(data.roomId).emit('join_room', { user: data.user, message: 'has joined this room.' });
+        console.log(`User joined a room: ${data.roomId}`);
     });
 
     //handle send message
