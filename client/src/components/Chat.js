@@ -3,22 +3,38 @@ import axios from "axios";
 import '../index.css';
 import '../styles/Chat.css';
 import * as openpgp from 'openpgp/lightweight';
+import { date } from 'joi';
 
 
 function Chat(props) 
 {
-	const { roomId, socket, roomMembers, publicKeys, user, roomClick } = props;
+	const { roomId, socket, user} = props;
     const [plainText, setPlainText] = useState('');
 	const [previousMessages, setPreviousMessages] = useState([]);
+	const [creator, setCreator] = useState('');
+	const [roomMembers, setRoomMembers] = useState([]);
+	const [timestamp, setTimestamp] = useState(Date.now());
+	const [publicKeys, setPublicKeys] = useState([]);
     const [messages, setMessages] = useState([]);
+	const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
 
+
+	useEffect(() =>
+    {
+        socket.on('join_room', (data) =>
+        {
+            console.log(data.user.name," joined the chat");
+            setRoomMembers((roomMembers) => [...roomMembers, data.user]);
+            setPublicKeys((publicKeys) => [...publicKeys, data.user.armoredPublicKey]);
+        });
+    }, [socket]);
 
 
 	useEffect(() => 
 	{
-		  console.log("roomClick is true, setting room messages to null");
-		  setMessages([]);
-	  }, [roomId]);
+		console.log("roomClick is true, setting room messages to null");
+		setMessages([]);
+	}, [roomId]);
 
 
 	const decryptMessages = async (message) =>
@@ -37,32 +53,48 @@ function Chat(props)
 			// console.error("Error in decrypting message ",error);
 		}
 	}
-	
 
-	const getChats = async (roomId) =>
+
+
+	const getJoinedRoomsAdvancedDetails = async (roomId) =>
 	{
+		console.log("getJoinedRoomsAdvancedDetails called ",roomId);
 		try
-		{
-			const response = await axios.post('http://localhost:3000/api/chat/getChat', { roomId });
-			const decrypted = await Promise.all(response.data.chats.map(chat => decryptMessages(chat.message)));
-			const chats = response.data.chats.map((chat, index) =>
+        {
+            const response = await axios.get(`http://localhost:3000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`);
+            console.log(response.data);
+			setCreator(response.data.rooms.creator);
+			setRoomMembers(response.data.rooms.roomMembers);
+			setTimestamp(response.data.rooms.timestamp);
+			const decrypted = await Promise.all(response.data.rooms.chats.map(chat => decryptMessages(chat.message)));
+			const chats = response.data.rooms.chats.map((chat, index) =>
 			{
 				chat.message = decrypted[index];
 				return chat;
 			});
 			setPreviousMessages(chats);
-		}
-		catch(error)
+			setPublicKeys(response.data.rooms.roomMembers.map(member => member.armoredPublicKey));
+			console.log("chats are ",chats);
+			console.log("encrypted chats are ",response.data.rooms.chats);
+        }
+		catch (error)
 		{
-			console.error("Error is fetching previous chats ",error);
+			console.error("Error fetching data:", error);
 		}
+        // const decrypted = await Promise.all(response.data.chats.map(chat => decryptMessages(chat.message)));
+			// const chats = response.data.chats.map((chat, index) =>
+			// {
+			// 	chat.message = decrypted[index];
+			// 	return chat;
+			// });
 	}
+
 
 	useEffect(() =>
 	{
 		if (roomId)
 		{
-			getChats(roomId);
+			getJoinedRoomsAdvancedDetails(roomId);
 		}
 	}, [roomId]);
 
@@ -103,6 +135,8 @@ function Chat(props)
 			console.error("Error in sending message ",error);
 		}
     };
+
+
 
     return (
       	<div className='chat_parent'>

@@ -79,7 +79,7 @@ const joinRoom = async (req, res) =>
 };
 
 
-const getJoinedRooms = async (req, res) =>
+const getJoinedRoomsBasicDetails = async (req, res) =>
 {
     try
     {
@@ -92,7 +92,13 @@ const getJoinedRooms = async (req, res) =>
         {
             return res.status(404).json({ message: "No joined rooms found" });
         }
-        res.status(200).json({ rooms });
+        const simplifiedRooms = rooms.map((room) =>
+        ({
+            roomId : room.roomId,
+            roomName : room.roomName,
+            groupProfilePic : room.groupProfilePic
+        }));
+        res.status(200).json({ rooms: simplifiedRooms });
     }
     catch (error)
     {
@@ -101,43 +107,32 @@ const getJoinedRooms = async (req, res) =>
     }
 }
 
-const getPublicKeys = async (req, res) =>
+const getJoinedRoomsAdvancedDetails = async (req, res) =>
 {
-    try
+    const roomId = req.query.roomId;
+    console.log(roomId);
+    try 
     {
-        const room = await ChatRoom.findOne({ roomId: req.body.roomId });
-        if (!room)
-        {
-            return res.status(404).json({ message: "Room not found" });
+        const room = await ChatRoom.findOne({ roomId: roomId });
+        console.log(room);
+        if (!room) {
+            return res.status(404).json({ message: "No joined rooms found" });
         }
-        const publicKeys = room.roomMembers.map(member => member.armoredPublicKey);
-        res.status(200).json({ publicKeys: publicKeys });
-    }
-    catch (error)
+        const simplifiedRoom = {
+            chats: room.chats,
+            creator: room.creator,
+            roomMembers: room.roomMembers,
+            timestamp: room.timestamp,
+        };
+        res.status(200).json({ rooms: simplifiedRoom });
+    } 
+    catch (error) 
     {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
-
-const getRoomMembers = async (req, res) =>
-{
-    try
-    {
-        const room = await ChatRoom.findOne({ roomId: req.body.roomId });
-        if (!room)
-        {
-            return res.status(404).json({ message: "Room not found" });
-        }
-        res.status(200).json({ roomMembers: room.roomMembers });
-    }
-    catch (error)
-    {
-        console.error(error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-}
 
 
 const uploadChat = async (req, res) => 
@@ -207,9 +202,8 @@ const deleteChats = async (req, res) =>
 module.exports = { 
     createRoom,
     joinRoom,
-    getJoinedRooms,
-    getPublicKeys,
-    getRoomMembers,
+    getJoinedRoomsBasicDetails,
+    getJoinedRoomsAdvancedDetails,
     uploadChat,
     getChat,
     deleteChats

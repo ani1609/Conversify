@@ -1,7 +1,7 @@
 const express=require("express");
 const connectDb = require('./configDB/MongoDB');
 const {login, signup, authenticateJWT, uploadRoomId, getRoomId, editUserInfo, changePassword, deleteUsers}=require('./controllers/userController');
-const {createRoom, joinRoom, getJoinedRooms, getRoomMembers, getPublicKeys, uploadChat, getChat, deleteChats}=require('./controllers/chatRoomController');
+const {createRoom, joinRoom, getJoinedRoomsBasicDetails, getJoinedRoomsAdvancedDetails, uploadChat, getChat, deleteChats}=require('./controllers/chatRoomController');
 const http=require('http');
 const{ Server }=require('socket.io');
 const cors=require('cors');
@@ -34,9 +34,8 @@ app.post('/api/chat/upload', uploadChat);
 app.post('/api/chat/getChat', getChat);
 app.post('/api/chat/createRoom', createRoom);
 app.post('/api/chat/joinRoom', joinRoom);
-app.post('/api/chat/getRoomMembers', getRoomMembers);
-app.get('/api/user/getJoinedRooms', getJoinedRooms);
-app.post('/api/chat/getPublicKeys', getPublicKeys);
+app.get('/api/user/getJoinedRoomsBasicDetails', getJoinedRoomsBasicDetails);
+app.get('/api/chat/getJoinedRoomsAdvancedDetails', getJoinedRoomsAdvancedDetails);
 
 
 
