@@ -7,10 +7,18 @@ import * as openpgp from 'openpgp/lightweight';
 
 function Chat(props) 
 {
-	const { roomId, socket, roomMembers, publicKeys, user } = props;
+	const { roomId, socket, roomMembers, publicKeys, user, roomClick } = props;
     const [plainText, setPlainText] = useState('');
 	const [previousMessages, setPreviousMessages] = useState([]);
     const [messages, setMessages] = useState([]);
+
+
+
+	useEffect(() => 
+	{
+		  console.log("roomClick is true, setting room messages to null");
+		  setMessages([]);
+	  }, [roomId]);
 
 
 	const decryptMessages = async (message) =>
@@ -97,17 +105,18 @@ function Chat(props)
     };
 
     return (
-      	<div>
+      	<div className='chat_parent'>
+			<p>{roomId}</p>
 			<form>
 				{previousMessages.map((data, index) => (
 					<div key={index} className='previous_messages'>
-						<p>{data.message}</p>
+						<p>PREV {data.message}</p>
 					</div>
 				))}
 
 				{messages.map((data, index) => (
 					<div key={index} className='message'>
-						<p>{data.message}</p>
+						<p>RECENT {data.message}</p>
 					</div>
 				))}
 
