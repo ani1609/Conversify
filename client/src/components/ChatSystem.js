@@ -4,7 +4,7 @@ import '../styles/ChatSystem.css';
 import Chat from './Chat.js';
 import axios from "axios";
 import io from 'socket.io-client';
-import { get, set } from 'mongoose';
+import { set } from 'mongoose';
 const socket=io.connect("http://localhost:3000");
 
 
@@ -18,7 +18,9 @@ function ChatSystem()
     const [roomName, setRoomName] = useState('');
     const [roomMembers, setRoomMembers] = useState([]);
     const [publicKeys, setPublicKeys] = useState([]);
+    const [joinedRooms, setJoinedRooms] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
+    let roomClick=false;
     const [user, setUser] = useState({});
     
 
@@ -40,7 +42,7 @@ function ChatSystem()
         }
     };
 
-    const getRoomId = async (userToken) =>
+    const getJoinedRooms = async (userToken) =>
     {
         try
         {
@@ -49,9 +51,9 @@ function ChatSystem()
                 Authorization: `Bearer ${userToken}`,
                 },
             };
-            const response = await axios.get("http://localhost:3000/api/user/getRoomId", config);
+            const response = await axios.get("http://localhost:3000/api/user/getJoinedRooms", config);
             console.log(response.data);
-            // setRoomId(response.data.roomId);
+            setJoinedRooms(response.data.rooms);
         }
         catch (error)
         {
@@ -64,7 +66,7 @@ function ChatSystem()
         if(userToken)
         {
             fetchDataFromProtectedAPI(userToken);
-            // getRoomId(userToken);
+            getJoinedRooms(userToken);
         }
     }, []);
 
@@ -181,41 +183,92 @@ function ChatSystem()
     };
 
 
+    const getPublicKeys = async (roomId) =>
+    {
+        try
+        {
+            const response = await axios.post('http://localhost:3000/api/chat/getPublicKeys', { roomId });
+            // return response.data.publicKey;
+            setPublicKeys([]);
+            setPublicKeys(response.data.publicKeys);
+            console.log(response.data.publicKeys);
+        }
+        catch(error)
+        {
+            console.error("Error in fetching public key ",error);
+        }
+    }
+
+    const handleRoomClick = (e) =>
+    {
+        roomClick=true;
+        const id = e.target.parentElement.children[1].innerText;
+        console.log("clicked room id is ",id);
+        getPublicKeys(id);
+        socket.emit('join_room', { roomId : id, user});
+        setRoomId(id);
+        setShowChat(false);
+        setShowChat(true);
+        roomClick=false;
+    };
+
+
 
     return (
         <div className='chatSystem_parent'>
             <div className='rooms_container'>
-                {showJoinCreateButtons && <div>
-                    <button onClick={() => setShowCreateForm(true)}>Create Room</button>
-                    <button onClick={() => setShowJoinForm(true)}>Join Room</button>
-                </div>}
+                <div className='join_create_container'>
+                    {showJoinCreateButtons && <div>
+                        <button onClick={() => setShowCreateForm(true)}>Create Room</button>
+                        <button onClick={() => setShowJoinForm(true)}>Join Room</button>
+                    </div>}
 
-                {showCreateForm && <form onSubmit={handleCreateRoom}>
-                    <label htmlFor="roomName">Enter Room Name</label>
-                    <input
-                        type='text'
-                        id="roomName"
-                        autoComplete="off"
-                        value={roomName}
-                        onChange={(e) => setRoomName(e.target.value)}
-                        required
-                    />
-                    <button type='submit'>Create Room</button>
-                </form>}
+                    {showCreateForm && <form onSubmit={handleCreateRoom}>
+                        <label htmlFor="roomName">Enter Room Name</label>
+                        <input
+                            type='text'
+                            id="roomName"
+                            autoComplete="off"
+                            value={roomName}
+                            onChange={(e) => setRoomName(e.target.value)}
+                            required
+                        />
+                        <button type='submit'>Create Room</button>
+                    </form>}
 
-                {showJoinForm && <form onSubmit={handleJoinRoom}>
-                    <label htmlFor="roomId">Enter Room Id</label>
-                    <input
-                        type='text'
-                        id="roomId"
-                        autoComplete="off"
-                        value={roomId}
-                        onChange={(e) => setRoomId(e.target.value)}
-                        required
-                    />
-                    <button type='submit'>Join Room</button>
-                </form>}
+                    {showJoinForm && <form onSubmit={handleJoinRoom}>
+                        <label htmlFor="roomId">Enter Room Id</label>
+                        <input
+                            type='text'
+                            id="roomId"
+                            autoComplete="off"
+                            value={roomId}
+                            onChange={(e) => setRoomId(e.target.value)}
+                            required
+                        />
+                        <button type='submit'>Join Room</button>
+                    </form>}
+                </div>
+
+                <div className='rooms_list'>
+                    {/* <input
+                        type="text"
+                        placeholder="Search for a chat room"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />*/}
+                   <ul>
+                        {joinedRooms.map((room, index) => (
+                            <li key={index} onClick={handleRoomClick}>
+                                <p>{room.roomName}</p>
+                                <p>{room.roomId}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
+
+
             {showChat && 
                 <Chat
                     roomId={roomId}
@@ -223,6 +276,7 @@ function ChatSystem()
                     roomMembers={roomMembers}
                     publicKeys={publicKeys}
                     user={user}
+                    roomClick={roomClick}
                 />
             }
         </div>

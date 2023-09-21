@@ -79,6 +79,48 @@ const joinRoom = async (req, res) =>
 };
 
 
+const getJoinedRooms = async (req, res) =>
+{
+    try
+    {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, SECRET_KEY);
+        const user = await User.findById(decoded.id);
+        const email = user.email;
+        const rooms = await ChatRoom.find({ "roomMembers.userEmail": email });
+        if (!rooms)
+        {
+            return res.status(404).json({ message: "No joined rooms found" });
+        }
+        res.status(200).json({ rooms });
+    }
+    catch (error)
+    {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+const getPublicKeys = async (req, res) =>
+{
+    try
+    {
+        const room = await ChatRoom.findOne({ roomId: req.body.roomId });
+        if (!room)
+        {
+            return res.status(404).json({ message: "Room not found" });
+        }
+        const publicKeys = room.roomMembers.map(member => member.armoredPublicKey);
+        res.status(200).json({ publicKeys: publicKeys });
+    }
+    catch (error)
+    {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+
 const getRoomMembers = async (req, res) =>
 {
     try
@@ -88,7 +130,6 @@ const getRoomMembers = async (req, res) =>
         {
             return res.status(404).json({ message: "Room not found" });
         }
-        console.log(room);
         res.status(200).json({ roomMembers: room.roomMembers });
     }
     catch (error)
@@ -99,7 +140,8 @@ const getRoomMembers = async (req, res) =>
 }
 
 
-const uploadChat = async (req, res) => {
+const uploadChat = async (req, res) => 
+{
     try 
     {
         const { roomId, message, senderEmail, timeStamp } = req.body;
@@ -165,6 +207,8 @@ const deleteChats = async (req, res) =>
 module.exports = { 
     createRoom,
     joinRoom,
+    getJoinedRooms,
+    getPublicKeys,
     getRoomMembers,
     uploadChat,
     getChat,
