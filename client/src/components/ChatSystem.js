@@ -16,11 +16,11 @@ function ChatSystem()
 	const [showChat, setShowChat]=useState(false);
     const [roomId, setRoomId] = useState('');
     const [roomName, setRoomName] = useState('');
+    const [groupProfilePic, setGroupProfilePic] = useState('');
     const [roomMembers, setRoomMembers] = useState([]);
     const [publicKeys, setPublicKeys] = useState([]);
     const [joinedRooms, setJoinedRooms] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
-    let roomClick=false;
     const [user, setUser] = useState({});
     
 
@@ -42,7 +42,7 @@ function ChatSystem()
         }
     };
 
-    const getJoinedRooms = async (userToken) =>
+    const getJoinedRoomsBasicDetails = async (userToken) =>
     {
         try
         {
@@ -51,7 +51,7 @@ function ChatSystem()
                 Authorization: `Bearer ${userToken}`,
                 },
             };
-            const response = await axios.get("http://localhost:3000/api/user/getJoinedRooms", config);
+            const response = await axios.get("http://localhost:3000/api/user/getJoinedRoomsBasicDetails", config);
             console.log(response.data);
             setJoinedRooms(response.data.rooms);
         }
@@ -66,32 +66,9 @@ function ChatSystem()
         if(userToken)
         {
             fetchDataFromProtectedAPI(userToken);
-            getJoinedRooms(userToken);
+            getJoinedRoomsBasicDetails(userToken);
         }
     }, []);
-
-    const getroomMembers = async (roomId) =>
-    {
-        try
-        {
-            const response = await axios.post('http://localhost:3000/api/chat/getRoomMembers', { roomId });
-            setRoomMembers(response.data.roomMembers);
-            const keys = response.data.roomMembers.map(member => member.armoredPublicKey);
-            setPublicKeys(keys);
-        }
-        catch(error)
-        {
-            console.error("Error in fetching room members ",error);
-        }
-    }
-
-    useEffect(() =>
-    {
-        if (roomId && roomId.length === 11)
-        {
-            getroomMembers(roomId);
-        }
-    }, [roomId]);
 
 
     const handleCreateRoom = async (e) =>
@@ -138,17 +115,6 @@ function ChatSystem()
         setShowCreateForm(false);
 	};
 
-
-    useEffect(() =>
-    {
-        socket.on('join_room', (data) =>
-        {
-            console.log(data.user.name," joined the chat");
-            setRoomMembers((roomMembers) => [...roomMembers, data.user]);
-            setPublicKeys((publicKeys) => [...publicKeys, data.user.armoredPublicKey]);
-        });
-    }, [socket]);
-
   
     const handleJoinRoom = async (e) => 
     {
@@ -171,7 +137,6 @@ function ChatSystem()
             };
             const response = await axios.post("http://localhost:3000/api/chat/joinRoom", data, config);
             console.log(response.data.message);
-            getroomMembers(roomId);
         }
         catch (error)
         {
@@ -183,33 +148,38 @@ function ChatSystem()
     };
 
 
-    const getPublicKeys = async (roomId) =>
-    {
-        try
-        {
-            const response = await axios.post('http://localhost:3000/api/chat/getPublicKeys', { roomId });
-            // return response.data.publicKey;
-            setPublicKeys([]);
-            setPublicKeys(response.data.publicKeys);
-            console.log(response.data.publicKeys);
-        }
-        catch(error)
-        {
-            console.error("Error in fetching public key ",error);
-        }
-    }
+    // const getPublicKeys = async (roomId) =>
+    // {
+    //     try
+    //     {
+    //         const response = await axios.post('http://localhost:3000/api/chat/getPublicKeys', { roomId });
+    //         // return response.data.publicKey;
+    //         setPublicKeys([]);
+    //         setPublicKeys(response.data.publicKeys);
+    //         console.log(response.data.publicKeys);
+    //     }
+    //     catch(error)
+    //     {
+    //         console.error("Error in fetching public key ",error);
+    //     }
+    // }
 
     const handleRoomClick = (e) =>
     {
-        roomClick=true;
-        const id = e.target.parentElement.children[1].innerText;
-        console.log("clicked room id is ",id);
-        getPublicKeys(id);
-        socket.emit('join_room', { roomId : id, user});
-        setRoomId(id);
+        const roomId = e.target.parentElement.children[1].innerText;
+        setRoomId(roomId);
+        console.log("clicked room id is ",roomId);
+        const roomName = e.target.parentElement.children[0].innerText;
+        setRoomName(roomName);
+        console.log("clicked room name is ",roomName);
+        const groupProfilePic = joinedRooms.find((room) => room.roomId === roomId).groupProfilePic;
+        setGroupProfilePic(groupProfilePic);
+        console.log("clicked room profile pic is ",groupProfilePic);
+
+        // getPublicKeys(roomId);
+        socket.emit('join_room', { roomId : roomId, user});
         setShowChat(false);
         setShowChat(true);
-        roomClick=false;
     };
 
 
@@ -271,12 +241,12 @@ function ChatSystem()
 
             {showChat && 
                 <Chat
-                    roomId={roomId}
-                    socket={socket}
-                    roomMembers={roomMembers}
-                    publicKeys={publicKeys}
                     user={user}
-                    roomClick={roomClick}
+                    socket={socket}
+                    roomId={roomId}
+                    roomName={roomName}
+                    groupProfilePic={groupProfilePic}
+                    // publicKeys={publicKeys}
                 />
             }
         </div>
