@@ -8,37 +8,45 @@
     justify-content: space-between;
     align-items: center;
     box-sizing: border-box;
+    background-color: #1A1A1D;
 }
 
 .navbar_parent a
 {
-    height: 80%;
+    font-family: 'Oswald', sans-serif;
+    font-size: 35px;
+    text-decoration: none;
+    color: #C3073F;
     display: flex;
     align-items: center;
     justify-content: center;
-    
 }
 
 .nav_tabs
 {
     display: flex;
     list-style-type: none;
-    gap: 50px;
     margin: 0;
     padding: 0;
-    height: 80%;
+    gap: 20px;
 }
 
-.nav_tabs li
+.login, .signup
 {
-    height: 100%;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
+    color: #C3073F;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 16px;
+    padding: 10px 15px;
+    border: 1.4px solid rgb(78, 78, 78);
+    border-radius: 5px;
+    transition: 0.2s ease-in-out;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+}
+
+.nav_tabs li:hover
+{
+    background-color: rgb(35, 35, 35);
 }
 
 .profile_icon
@@ -69,14 +77,4 @@
 {
     padding: 5px 10px;
     cursor: pointer;
-}
-
-.login_form_container, .signup_form_container
-{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }

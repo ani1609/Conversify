@@ -53,11 +53,11 @@ function Navbar()
 
     return(
         <div className='navbar_parent'>
-            <a href=''>Chat</a>
+            <a href=''>Conversify</a>
             {user?.name && <p>{user.name}</p>}
             <ul className='nav_tabs'>
-                {!userToken && <li onClick={()=>setShowLoginForm(true)}>Log in</li>}
-                {!userToken && <li onClick={()=>setShowSignupForm(true)}>Sign up</li>}
+                {!userToken && <li onClick={()=>setShowLoginForm(true)} className='login'>Log in</li>}
+                {!userToken && <li onClick={()=>setShowSignupForm(true)} className='signup'>Sign up</li>}
                 {userToken && <li onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(true)}>
                     {user?.profilePic ?
                         <img src={user.profilePic} alt='profile pic' />
