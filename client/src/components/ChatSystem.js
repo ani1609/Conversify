@@ -4,12 +4,13 @@ import '../styles/ChatSystem.css';
 import Chat from './Chat.js';
 import axios from "axios";
 import io from 'socket.io-client';
-import { set } from 'mongoose';
+import { useTheme } from './ThemeContext';
 const socket=io.connect("http://localhost:3000");
 
 
 function ChatSystem()
 {
+    const { dark, setDark } = useTheme();
     const [showJoinCreateButtons, setShowJoinCreateButtons] = useState(true);
 	const [showJoinForm, setShowJoinForm] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -22,6 +23,12 @@ function ChatSystem()
     const [joinedRooms, setJoinedRooms] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [user, setUser] = useState({});
+
+
+    useEffect(() =>
+    {
+        console.log("mdoe is ", dark);
+    }, [dark]);
     
 
     const fetchDataFromProtectedAPI = async (userToken) => 

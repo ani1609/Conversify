@@ -5,12 +5,16 @@ import '../styles/Navbar.css';
 import {ReactComponent as Profile} from '../icons/profile.svg';
 import Login from './Login.js';
 import Signup from './Signup.js';
+import { useTheme } from './ThemeContext';
+import {ReactComponent as Light} from '../icons/light_mode.svg';
+import {ReactComponent as Dark} from '../icons/dark_mode.svg';
 
 function Navbar()
 {
     const [showLoginForm, setShowLoginForm] = useState(false);
     const [showSignupForm, setShowSignupForm] = useState(false);
     const [user, setUser] = useState({});
+    const { dark, setDark } = useTheme();
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [profileDropDown, setProfileDropDown] = useState(false);
     
@@ -56,6 +60,9 @@ function Navbar()
             <a href=''>Conversify</a>
             {user?.name && <p>{user.name}</p>}
             <ul className='nav_tabs'>
+                <li onClick={()=>setDark(!dark)} className='mode_icon'>
+                    {dark ? <Dark className='dark_icon'/> : <Light className='light_icon'/>}
+                </li>
                 {!userToken && <li onClick={()=>setShowLoginForm(true)} className='login'>Log in</li>}
                 {!userToken && <li onClick={()=>setShowSignupForm(true)} className='signup'>Sign up</li>}
                 {userToken && <li onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(true)}>
