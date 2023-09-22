@@ -58,20 +58,12 @@ function Navbar()
     return(
         <div className='navbar_parent'>
             <a href=''>Conversify</a>
-            {user?.name && <p>{user.name}</p>}
             <ul className='nav_tabs'>
-                <li onClick={()=>setDark(!dark)} className='mode_icon'>
-                    {dark ? <Dark className='dark_icon'/> : <Light className='light_icon'/>}
-                </li>
+                <li onClick={()=>setDark(!dark)} className='theme'>{dark ? <Dark className='dark_icon'/> : <Light className='light_icon'/>}</li>
                 {!userToken && <li onClick={()=>setShowLoginForm(true)} className='login'>Log in</li>}
                 {!userToken && <li onClick={()=>setShowSignupForm(true)} className='signup'>Sign up</li>}
-                {userToken && <li onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(true)}>
-                    {user?.profilePic ?
-                        <img src={user.profilePic} alt='profile pic' />
-                        :
-                        <Profile className='profile_icon'/>
-                    }
-                </li>}
+                {userToken && user?.profilePic && <li className='profile_pic_wrapper'><img src={user.profilePic} alt='profile_pic'/></li>}
+                {userToken && !user.profilePic && <li className='profile_icon_wrapper'><Profile className='profile_icon'/></li>}
             </ul>
             {profileDropDown &&
                     <ul className='profile_dropdown' onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(true)}>
