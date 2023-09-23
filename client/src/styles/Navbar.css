@@ -12,6 +12,7 @@
 
 .navbar_parent a
 {
+    color: var(--primary);
     font-family: 'Oswald', sans-serif;
     font-size: 35px;
     text-decoration: none;
@@ -46,19 +47,12 @@
     height: 20px;
     width: 20px;
     cursor: pointer;
-}
-.light_icon
-{
-    fill: var(--dark_primary);
-}
-
-.dark_icon
-{
-    fill: var(--light_primary);
+    fill: var(--primary)
 }
 
 .login, .signup
 {
+    color: var(--primary);
     cursor: pointer;
     font-size: 15px;
     padding: 9px 14px;
@@ -85,6 +79,7 @@
     height: 20px;
     width: 20px;
     cursor: pointer;
+    fill: var(--primary);
 }
 
 .profile_dropdown

@@ -21,6 +21,7 @@ function ChatSystem()
     const [joinedRooms, setJoinedRooms] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [user, setUser] = useState({});
+    const [searchQuery, setSearchQuery] = useState("");
 
 
     useEffect(() =>
@@ -203,10 +204,10 @@ function ChatSystem()
 
     return (
         <div className='chatSystem_parent'>
-            <div className={dark ? 'rooms_container dark_secondary-bg' : 'rooms_container light_secondary-bg'} style={{ borderRight: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
-                <div className='join_create_container'>
-                    <button onClick={() => setShowCreateForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border dark_primary' : 'light_secondary-bg light_secondary-hover light_secondary-border light_primary'}>Create Room</button>
-                    <button onClick={() => setShowJoinForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border dark_primary' : 'light_secondary-bg light_secondary-hover light_secondary-border light_primary'}>Join Room</button>
+            <div className={dark ? 'rooms_container dark_bg' : 'rooms_container light_bg'} style={{ borderRight: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
+                <div className='join_create_container' style={{ borderBottom: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
+                    <button onClick={() => setShowCreateForm(true)} className={dark ? 'dark_bg dark_hover dark_border' : 'light_bg light_hover light_border'}>Create Room</button>
+                    <button onClick={() => setShowJoinForm(true)} className={dark ? 'dark_bg dark_hover dark_border ' : 'light_bg light_hover light_border'}>Join Room</button>
 
                     {showCreateForm && <form onSubmit={handleCreateRoom}>
                         <label htmlFor="roomName">Enter Room Name</label>
@@ -236,37 +237,39 @@ function ChatSystem()
                 </div>
 
                 <div className='rooms_list'>
-                    {/* <input
-                        type="text"
-                        placeholder="Search for a chat room"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />*/}
+                    <div className={dark ? 'dark_room-filter' : 'light_room-filter'}>
+                        <input
+                            type="text"
+                            placeholder="Search for a chat room"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                    <ul>
-                        {joinedRooms.map((room, index) => (
+                        {joinedRooms.filter((room) =>room.roomName.toLowerCase().includes(searchQuery.toLowerCase())).map((room, index) => (
                             <div>
-                                <li key={index}>
-                                <div className='room_click'  onClick={() => handleRoomClick(room.roomId, room.roomName)}></div>
-                                {room.groupProfilePic && <img src={room.groupProfilePic} alt='room_profile_pic'/>}
-                                {!room.groupProfilePic && <Group className={dark ? 'group_icon dark_fill' : 'group_icon light_fill'}/>}
-                                <div className='grp_details'>
-                                    <div>
-                                        <p className='room_name'>{room.roomName}</p>
-                                        {room.lastMessage && <p className='last_message'>Ankit: {room.lastMessage.message}</p>}
-                                        {!room.lastMessage && <p className='tap_to_chat'>Tap to start chat</p>}
+                                <li key={index} className={dark ? 'dark_hover' : 'light_hover'}>
+                                        <div className='room_click'  onClick={() => handleRoomClick(room.roomId, room.roomName)}></div>
+                                    {room.groupProfilePic && <img src={room.groupProfilePic} alt='room_profile_pic'/>}
+                                    {!room.groupProfilePic && <Group className={dark ? 'dark_group_icon' : 'light_group_icon'}/>}
+                                    <div className='grp_details'>
+                                        <div>
+                                            <p className={dark ? 'room_name dark_primary-font' : 'room_name light_primary-font'}>{room.roomName}</p>
+                                            {room.lastMessage && <p className={dark ? 'last_message dark_secondary-font' : 'last_message light_secondary-font'}>Ankit: {room.lastMessage.message}</p>}
+                                            {!room.lastMessage && <p className={dark ? 'tap_to_chat dark_secondary-font' : 'tap_to_chat light_secondary-font'}>Tap to start chat</p>}
+                                        </div>
+                                        {room.lastMessage?.timestamp && (
+                                            <p className={dark ? 'last_msg_timestamp dark_secondary-font' : 'last_msg_timestamp light_secondary-font'}>
+                                                {isToday(new Date(room.lastMessage.timestamp))
+                                                ? formatTime(new Date(room.lastMessage.timestamp))
+                                                : isYesterday(new Date(room.lastMessage.timestamp))
+                                                ? 'Yesterday'
+                                                : new Date(room.lastMessage.timestamp).toLocaleTimeString()}
+                                            </p>
+                                        )}
                                     </div>
-                                    {room.lastMessage?.timestamp && (
-                                        <p className='last_msg_timestamp'>
-                                            {isToday(new Date(room.lastMessage.timestamp))
-                                            ? formatTime(new Date(room.lastMessage.timestamp))
-                                            : isYesterday(new Date(room.lastMessage.timestamp))
-                                            ? 'Yesterday'
-                                            : new Date(room.lastMessage.timestamp).toLocaleTimeString()}
-                                        </p>
-                                    )}
-                                </div>
-                            </li>
-                            <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(165, 165, 165)' }}></div>
+                                </li>
+                            <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(199, 199, 199)' }}></div>
 
                             </div>
 
