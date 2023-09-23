@@ -3,6 +3,7 @@ const {User}=require('../models/user');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { SECRET_KEY } = process.env;
+const openpgp = require('openpgp');
 
 
 
@@ -79,38 +80,68 @@ const joinRoom = async (req, res) =>
 };
 
 
-const getJoinedRoomsBasicDetails = async (req, res) =>
-{
-    try
-    {
+const getJoinedRoomsBasicDetails = async (req, res) => {
+    try {
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, SECRET_KEY);
         const user = await User.findById(decoded.id);
         const email = user.email;
         const rooms = await ChatRoom.find({ "roomMembers.userEmail": email });
-        if (!rooms)
+
+        if (!rooms) 
         {
             return res.status(404).json({ message: "No joined rooms found" });
         }
-        const simplifiedRooms = rooms.map((room) =>
-        ({
-            roomId : room.roomId,
-            roomName : room.roomName,
-            groupProfilePic : room.groupProfilePic
+
+        const simplifiedRooms = await Promise.all(rooms.map(async (room) => {
+            if (room.chats.length > 0 && room.chats[room.chats.length - 1].message) 
+            {
+                console.log("encrypted message is ",room.chats[room.chats.length - 1]);
+                const decryptedMessage = await decryptMessage(room.chats[room.chats.length - 1].message, user.encryptedPrivateKey);
+                console.log("decrypted message is ",decryptedMessage);
+                return {
+                    roomId: room.roomId,
+                    roomName: room.roomName,
+                    groupProfilePic: room.groupProfilePic,
+                    lastMessage: { senderEmail : room.chats[room.chats.length - 1].senderEmail, message: decryptedMessage, timestamp : room.chats[room.chats.length - 1].timestamp },
+                };
+            }
+            return {
+                roomId: room.roomId,
+                roomName: room.roomName,
+                groupProfilePic: room.groupProfilePic,
+                lastMessage: null,
+            };
         }));
+
         res.status(200).json({ rooms: simplifiedRooms });
-    }
-    catch (error)
-    {
+    } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+async function decryptMessage(encryptedMessage, privateKey) 
+{
+    try 
+    {
+        const { data: decrypted } = await openpgp.decrypt
+        ({
+            message: await openpgp.readMessage({ armoredMessage: encryptedMessage }),
+            decryptionKeys: await openpgp.readPrivateKey({ armoredKey: privateKey }),
+        });
+        return decrypted;
+    } 
+    catch (error) 
+    {
+        console.error("Error in decrypting message: ", error);
+        return "Error: Message decryption failed";
     }
 }
 
 const getJoinedRoomsAdvancedDetails = async (req, res) =>
 {
     const roomId = req.query.roomId;
-    console.log(roomId);
     try 
     {
         const room = await ChatRoom.findOne({ roomId: roomId });
