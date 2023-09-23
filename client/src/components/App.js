@@ -9,7 +9,7 @@ function App()
         <ThemeProvider>
             <div className="App">
                 <Navbar/>
-                {/* <ChatSystem/> */}
+                <ChatSystem/>
             </div>
         </ThemeProvider>
     );

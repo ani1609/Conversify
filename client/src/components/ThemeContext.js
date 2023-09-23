@@ -9,7 +9,7 @@ export function useTheme()
 
 export function ThemeProvider({ children }) 
 {
-    const [dark, setDark] = useState(false);
+    const [dark, setDark] = useState(true);
 
     return (
         <ThemeContext.Provider value={{ dark, setDark }}>
