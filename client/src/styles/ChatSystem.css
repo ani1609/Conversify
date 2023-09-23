@@ -4,17 +4,33 @@
     display: flex;
     width: 100vw;
     height: calc(100vh - 70px);
-    background-color: #f5f5f5;
 }
 
 .rooms_container
 {
     width: 350px;
+    transition: 0.5s ease-in-out;
 }
 
-.rooms_list
+.join_create_container
 {
+    height: 80px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
 
+.join_create_container button
+{
+    color: var(--dark_primary);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 9px 14px;
+    border-radius: 5px;
+    transition: 0.2s ease-in-out;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    background-color: transparent;
 }
 
 .rooms_list ul

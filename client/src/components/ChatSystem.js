@@ -11,15 +11,12 @@ const socket=io.connect("http://localhost:3000");
 function ChatSystem()
 {
     const { dark, setDark } = useTheme();
-    const [showJoinCreateButtons, setShowJoinCreateButtons] = useState(true);
 	const [showJoinForm, setShowJoinForm] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
 	const [showChat, setShowChat]=useState(false);
     const [roomId, setRoomId] = useState('');
     const [roomName, setRoomName] = useState('');
     const [groupProfilePic, setGroupProfilePic] = useState('');
-    const [roomMembers, setRoomMembers] = useState([]);
-    const [publicKeys, setPublicKeys] = useState([]);
     const [joinedRooms, setJoinedRooms] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [user, setUser] = useState({});
@@ -117,7 +114,6 @@ function ChatSystem()
         {
             console.error("Error fetching data:", error);
         }
-		setShowJoinCreateButtons(false);
 		setShowChat(true);
         setShowCreateForm(false);
 	};
@@ -149,27 +145,10 @@ function ChatSystem()
         {
             console.error("Error fetching data:", error);
         }
-		setShowJoinCreateButtons(false);
 		setShowJoinForm(false);
 		setShowChat(true);
     };
 
-
-    // const getPublicKeys = async (roomId) =>
-    // {
-    //     try
-    //     {
-    //         const response = await axios.post('http://localhost:3000/api/chat/getPublicKeys', { roomId });
-    //         // return response.data.publicKey;
-    //         setPublicKeys([]);
-    //         setPublicKeys(response.data.publicKeys);
-    //         console.log(response.data.publicKeys);
-    //     }
-    //     catch(error)
-    //     {
-    //         console.error("Error in fetching public key ",error);
-    //     }
-    // }
 
     const handleRoomClick = (e) =>
     {
@@ -193,12 +172,10 @@ function ChatSystem()
 
     return (
         <div className='chatSystem_parent'>
-            <div className='rooms_container'>
+            <div className={dark ? 'rooms_container dark_secondary-bg' : 'rooms_container light_secondary-bg'} style={{ borderRight: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
                 <div className='join_create_container'>
-                    {showJoinCreateButtons && <div>
-                        <button onClick={() => setShowCreateForm(true)}>Create Room</button>
-                        <button onClick={() => setShowJoinForm(true)}>Join Room</button>
-                    </div>}
+                    <button onClick={() => setShowCreateForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border' : 'light_secondary-bg light_secondary-hover light_secondary-border'}>Create Room</button>
+                    <button onClick={() => setShowJoinForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border' : 'light_secondary-bg light_secondary-hover light_secondary-border'}>Join Room</button>
 
                     {showCreateForm && <form onSubmit={handleCreateRoom}>
                         <label htmlFor="roomName">Enter Room Name</label>
