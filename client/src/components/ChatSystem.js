@@ -21,6 +21,7 @@ function ChatSystem()
     const [joinedRooms, setJoinedRooms] = useState([]);
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [user, setUser] = useState({});
+    const [searchQuery, setSearchQuery] = useState("");
 
 
     useEffect(() =>
@@ -236,14 +237,18 @@ function ChatSystem()
                 </div>
 
                 <div className='rooms_list'>
-                    {/* <input
-                        type="text"
-                        placeholder="Search for a chat room"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />*/}
+                    <div className='room_filter'>
+                        <input
+                            style={{backgroundColor: dark ? 'rgb(46, 46, 46)' : 'rgb(230, 230, 230)'}}
+                            className={dark ? 'dark_secondary-font' : 'light_secondary-font'}
+                            type="text"
+                            placeholder="Search for a chat room"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                    <ul>
-                        {joinedRooms.map((room, index) => (
+                        {joinedRooms.filter((room) =>room.roomName.toLowerCase().includes(searchQuery.toLowerCase())).map((room, index) => (
                             <div>
                                 <li key={index} className={dark ? 'dark_hover' : 'light_hover'}>
                                         <div className='room_click'  onClick={() => handleRoomClick(room.roomId, room.roomName)}></div>
