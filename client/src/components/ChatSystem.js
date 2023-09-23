@@ -237,10 +237,8 @@ function ChatSystem()
                 </div>
 
                 <div className='rooms_list'>
-                    <div className='room_filter'>
+                    <div className={dark ? 'dark_room-filter' : 'light_room-filter'}>
                         <input
-                            style={{backgroundColor: dark ? 'rgb(46, 46, 46)' : 'rgb(230, 230, 230)'}}
-                            className={dark ? 'dark_secondary-font' : 'light_secondary-font'}
                             type="text"
                             placeholder="Search for a chat room"
                             value={searchQuery}

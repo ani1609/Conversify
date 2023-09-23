@@ -37,7 +37,7 @@
     background-color: transparent;
 }
 
-.room_filter
+.dark_room-filter, .light_room-filter
 {
     width: 100%;
     display: flex;
@@ -45,7 +45,7 @@
     align-items: center;
 }
 
-.room_filter input
+.dark_room-filter input, .light_room-filter input
 {
     margin: 15px auto;
     width: 95%;
@@ -55,11 +55,46 @@
     padding: 10px 15px;
     box-sizing: border-box;
     transition: 0.5s ease-in-out;
-    outline: 0;
     border: 0;
+    outline: 0;
     border-radius: 5px;
     transition: 0.5s ease-in-out;
 }
+
+.dark_room-filter input
+{
+    background-color: var(--dark_hover);
+    color: var(--dark_secondary-font);
+}
+
+.dark_room-filter input::placeholder
+{
+    color: var(--dark_secondary-font);
+}
+
+/*
+.dark_room-filter input:focus
+{
+    border: 2px solid rgb(78, 78, 78);
+    outline: 0;
+} */
+
+.light_room-filter input
+{
+    background-color: var(--light_hover);
+    color: var(--light_secondary-font);
+}
+
+.light_room-filter input::placeholder
+{
+    color: var(--light_secondary-font);
+}
+/* 
+.light_room-filter input:focus
+{
+    border: 2px solid rgb(199, 199, 199);
+    outline: 0;
+} */
 
 .rooms_list ul
 {
