@@ -4,6 +4,7 @@ import '../styles/ChatSystem.css';
 import Chat from './Chat.js';
 import axios from "axios";
 import io from 'socket.io-client';
+import {ReactComponent as Group} from '../icons/group.svg';
 import { useTheme } from './ThemeContext';
 const socket=io.connect("http://localhost:3000");
 
@@ -56,7 +57,7 @@ function ChatSystem()
                 },
             };
             const response = await axios.get("http://localhost:3000/api/user/getJoinedRoomsBasicDetails", config);
-            console.log(response.data);
+            console.log(response.data.rooms);
             setJoinedRooms(response.data.rooms);
         }
         catch (error)
@@ -150,12 +151,10 @@ function ChatSystem()
     };
 
 
-    const handleRoomClick = (e) =>
+    const handleRoomClick = (roomId, roomName) =>
     {
-        const roomId = e.target.parentElement.children[1].innerText;
         setRoomId(roomId);
         console.log("clicked room id is ",roomId);
-        const roomName = e.target.parentElement.children[0].innerText;
         setRoomName(roomName);
         console.log("clicked room name is ",roomName);
         const groupProfilePic = joinedRooms.find((room) => room.roomId === roomId).groupProfilePic;
@@ -168,14 +167,46 @@ function ChatSystem()
         setShowChat(true);
     };
 
+    function formatTime(date) 
+    {
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        return `${formattedHours}:${formattedMinutes} ${ampm}`;
+    }
+
+    function isToday(date) 
+    {
+        const today = new Date();
+        return (
+          date.getDate() === today.getDate() &&
+          date.getMonth() === today.getMonth() &&
+          date.getFullYear() === today.getFullYear()
+        );
+    }
+      
+    // Function to check if a date is yesterday
+    function isYesterday(date) 
+    {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return (
+          date.getDate() === yesterday.getDate() &&
+          date.getMonth() === yesterday.getMonth() &&
+          date.getFullYear() === yesterday.getFullYear()
+        );
+    }
+
 
 
     return (
         <div className='chatSystem_parent'>
             <div className={dark ? 'rooms_container dark_secondary-bg' : 'rooms_container light_secondary-bg'} style={{ borderRight: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
                 <div className='join_create_container'>
-                    <button onClick={() => setShowCreateForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border' : 'light_secondary-bg light_secondary-hover light_secondary-border'}>Create Room</button>
-                    <button onClick={() => setShowJoinForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border' : 'light_secondary-bg light_secondary-hover light_secondary-border'}>Join Room</button>
+                    <button onClick={() => setShowCreateForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border dark_primary' : 'light_secondary-bg light_secondary-hover light_secondary-border light_primary'}>Create Room</button>
+                    <button onClick={() => setShowJoinForm(true)} className={dark ? 'dark_secondary-bg dark_secondary-hover dark_secondary-border dark_primary' : 'light_secondary-bg light_secondary-hover light_secondary-border light_primary'}>Join Room</button>
 
                     {showCreateForm && <form onSubmit={handleCreateRoom}>
                         <label htmlFor="roomName">Enter Room Name</label>
@@ -213,10 +244,32 @@ function ChatSystem()
                     />*/}
                    <ul>
                         {joinedRooms.map((room, index) => (
-                            <li key={index} onClick={handleRoomClick}>
-                                <p>{room.roomName}</p>
-                                <p>{room.roomId}</p>
+                            <div>
+                                <li key={index}>
+                                <div className='room_click'  onClick={() => handleRoomClick(room.roomId, room.roomName)}></div>
+                                {room.groupProfilePic && <img src={room.groupProfilePic} alt='room_profile_pic'/>}
+                                {!room.groupProfilePic && <Group className={dark ? 'group_icon dark_fill' : 'group_icon light_fill'}/>}
+                                <div className='grp_details'>
+                                    <div>
+                                        <p className='room_name'>{room.roomName}</p>
+                                        {room.lastMessage && <p className='last_message'>Ankit: {room.lastMessage.message}</p>}
+                                        {!room.lastMessage && <p className='tap_to_chat'>Tap to start chat</p>}
+                                    </div>
+                                    {room.lastMessage?.timestamp && (
+                                        <p className='last_msg_timestamp'>
+                                            {isToday(new Date(room.lastMessage.timestamp))
+                                            ? formatTime(new Date(room.lastMessage.timestamp))
+                                            : isYesterday(new Date(room.lastMessage.timestamp))
+                                            ? 'Yesterday'
+                                            : new Date(room.lastMessage.timestamp).toLocaleTimeString()}
+                                        </p>
+                                    )}
+                                </div>
                             </li>
+                            <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(165, 165, 165)' }}></div>
+
+                            </div>
+
                         ))}
                     </ul>
                 </div>

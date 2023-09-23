@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+
 
 body 
 {
@@ -22,6 +24,7 @@ body
     --light_secondary-bg: white;
     /* --dark_primary: #1f0310; */
     --light_primary: #C3073F;
+    --light_secondary: #C3073F;
     --light_primary-hover: rgb(230, 230, 230);
     --light_primary-border: rgb(176, 176, 176);
     --light_secondary-hover: rgb(230, 230, 230);
@@ -47,12 +50,17 @@ body
 
 .dark_primary
 {
-    background-color: var(--dark_primary);
+    color: var(--dark_primary);
 }
 
 .dark_secondary
 {
-    background-color: var(--dark_secondary);
+    color: var(--dark_secondary);
+}
+
+.dark_fill
+{
+    fill: var(--dark_primary);
 }
 
 .dark_primary-hover:hover
@@ -77,6 +85,9 @@ body
 
 
 
+
+
+
 .light_primary-bg
 {
     background-color: var(--light_primary-bg);
@@ -89,12 +100,17 @@ body
 
 .light_primary
 {
-    background-color: var(--light_primary);
+    color: var(--light_primary);
 }
 
 .light_secondary
 {
-    background-color: var(--light_secondary);
+    color: var(--light_secondary);
+}
+
+.light_fill
+{
+    fill: var(--light_primary);
 }
 
 .light_primary-hover:hover

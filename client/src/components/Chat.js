@@ -3,7 +3,6 @@ import axios from "axios";
 import '../index.css';
 import '../styles/Chat.css';
 import * as openpgp from 'openpgp/lightweight';
-import { date } from 'joi';
 
 
 function Chat(props) 
