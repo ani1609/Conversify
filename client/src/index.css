@@ -7,28 +7,21 @@ body
 {
     margin: 0;
     padding: 0;
-    /* --dark_primary-bg: #488397; */
-    --dark_primary-bg: #1A1A1D;
-    --dark_secondary-bg: #1A1A1D;
-    /* --dark_primary: #1f0310; */
-    --dark_primary: #C3073F;
-    --dark_seconday: #C3073F;
-    --dark_primary-hover: rgb(46, 46, 46);
-    --dark_primary-border: rgb(78, 78, 78);
-    --dark_secondary-hover: rgb(42, 42, 42);
-    --dark_secondary-border: rgb(59, 59, 59);
+
+    --primary: #C3073F;
 
 
+    --dark_bg: #1A1A1D;
+    --dark_primary-font: #EDEDED;
+    --dark_secondary-font: #888888;
+    --dark_hover: rgb(46, 46, 46);
+    --dark_border: rgb(78, 78, 78);
 
-    --light_primary-bg: white;
-    --light_secondary-bg: white;
-    /* --dark_primary: #1f0310; */
-    --light_primary: #C3073F;
-    --light_secondary: #C3073F;
-    --light_primary-hover: rgb(230, 230, 230);
-    --light_primary-border: rgb(176, 176, 176);
-    --light_secondary-hover: rgb(230, 230, 230);
-    --light_secondary-border: rgb(165, 165, 165);
+    --light_bg: white;
+    --light_primary-font: #000000;
+    --light_secondary-font: #888888;
+    --light_hover: rgb(230, 230, 230);
+    --light_border: rgb(176, 176, 176);
 
 
 
@@ -38,100 +31,58 @@ body
     -moz-osx-font-smoothing: grayscale;
 }
 
-.dark_primary-bg
+
+.dark_primary-font
 {
-    background-color: var(--dark_primary-bg);
+    color: var(--dark_primary-font);
 }
 
-.dark_secondary-bg
+.light_primary-font
 {
-    background-color: var(--dark_secondary-bg);
+    color: var(--light_primary-font);
 }
 
-.dark_primary
+.dark_secondary-font
 {
-    color: var(--dark_primary);
+    color: var(--dark_secondary-font);
 }
 
-.dark_secondary
+.light_secondary-font
 {
-    color: var(--dark_secondary);
+    color: var(--light_secondary-font);
 }
 
-.dark_fill
+.dark_bg
 {
-    fill: var(--dark_primary);
+    background-color: var(--dark_bg);
 }
 
-.dark_primary-hover:hover
+.light_bg
 {
-    background-color: var(--dark_primary-hover);
+    background-color: var(--light_bg);
 }
 
-.dark_secondary-hover:hover
+.dark_hover:hover
 {
-    background-color: var(--dark_secondary-hover);
+    background-color: var(--dark_hover);
 }
 
-.dark_primary-border
+.light_hover:hover
 {
-    border: 1px solid var(--dark_primary-border);
+    background-color: var(--light_hover);
 }
 
-.dark_secondary-border
+.dark_border
 {
-    border: 1px solid var(--dark_secondary-border);
+    border: 1px solid var(--dark_border);
+}
+
+.light_border
+{
+    border: 1px solid var(--light_border);
 }
 
 
-
-
-
-
-.light_primary-bg
-{
-    background-color: var(--light_primary-bg);
-}
-
-.light_secondary-bg
-{
-    background-color: var(--light_secondary-bg);
-}
-
-.light_primary
-{
-    color: var(--light_primary);
-}
-
-.light_secondary
-{
-    color: var(--light_secondary);
-}
-
-.light_fill
-{
-    fill: var(--light_primary);
-}
-
-.light_primary-hover:hover
-{
-    background-color: var(--light_primary-hover);
-}
-
-.light_secondary-hover:hover
-{
-    background-color: var(--light_secondary-hover);
-}
-
-.light_primary-border
-{
-    border: 1px solid var(--light_primary-border);
-}
-
-.light_secondary-border
-{
-    border: 1px solid var(--light_secondary-border);
-}
 
 code 
 {
