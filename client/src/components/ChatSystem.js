@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import '../index.css';
 import '../styles/ChatSystem.css';
 import Chat from './Chat.js';
@@ -22,6 +22,8 @@ function ChatSystem()
     const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
     const [user, setUser] = useState({});
     const [searchQuery, setSearchQuery] = useState("");
+    const roomsListRef = useRef(null);
+    const [searchShadow, setSearchShadow] = useState(false);
 
 
     useEffect(() =>
@@ -200,6 +202,19 @@ function ChatSystem()
         );
     }
 
+    const handleRoomsScroll = () =>
+    {
+        if (roomsListRef.current.scrollTop>10) 
+        {
+            console.log("scrolled");
+            setSearchShadow(true);
+        }
+        else
+        {
+            setSearchShadow(false);
+        }
+    }
+
 
 
     return (
@@ -237,7 +252,7 @@ function ChatSystem()
                 </div>
 
                 <div className='rooms_list'>
-                    <div className={dark ? 'dark_room-filter' : 'light_room-filter'}>
+                    <div className={searchShadow ? dark ? 'dark_room-filter dark_room-filter-shadow' : 'light_room-filter light_room-filter-shadow' : dark ? 'dark_room-filter' : 'light_room-filter'}>
                         <input
                             type="text"
                             placeholder="Search for a chat room"
@@ -245,9 +260,9 @@ function ChatSystem()
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                   <ul>
+                   <ul ref={roomsListRef} onScroll={handleRoomsScroll}>
                         {joinedRooms.filter((room) =>room.roomName.toLowerCase().includes(searchQuery.toLowerCase())).map((room, index) => (
-                            <div>
+                            <div key={index}>
                                 <li key={index} className={dark ? 'dark_hover' : 'light_hover'}>
                                         <div className='room_click'  onClick={() => handleRoomClick(room.roomId, room.roomName)}></div>
                                     {room.groupProfilePic && <img src={room.groupProfilePic} alt='room_profile_pic'/>}
@@ -269,10 +284,9 @@ function ChatSystem()
                                         )}
                                     </div>
                                 </li>
-                            <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(199, 199, 199)' }}></div>
 
+                                <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(199, 199, 199)' }}></div>
                             </div>
-
                         ))}
                     </ul>
                 </div>

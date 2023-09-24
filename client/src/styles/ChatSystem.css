@@ -43,6 +43,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: 0.2s ease-in-out;
 }
 
 .dark_room-filter input, .light_room-filter input
@@ -96,11 +97,23 @@
     outline: 0;
 } */
 
+.dark_room-filter-shadow
+{
+    box-shadow: rgba(223, 206, 206, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+}
+
+.light_room-filter-shadow
+{
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+}
+
 .rooms_list ul
 {
     margin: 0;
     padding: 0;
     list-style-type: none;
+    max-height: calc(100vh - 197px);
+    overflow-y: auto;
 }
 
 .rooms_list ul li
