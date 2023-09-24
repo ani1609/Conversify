@@ -101,6 +101,8 @@
     margin: 0;
     padding: 0;
     list-style-type: none;
+    max-height: calc(100vh - 197px);
+    overflow-y: auto;
 }
 
 .rooms_list ul li

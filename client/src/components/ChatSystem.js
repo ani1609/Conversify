@@ -247,7 +247,7 @@ function ChatSystem()
                     </div>
                    <ul>
                         {joinedRooms.filter((room) =>room.roomName.toLowerCase().includes(searchQuery.toLowerCase())).map((room, index) => (
-                            <div>
+                            <div key={index}>
                                 <li key={index} className={dark ? 'dark_hover' : 'light_hover'}>
                                         <div className='room_click'  onClick={() => handleRoomClick(room.roomId, room.roomName)}></div>
                                     {room.groupProfilePic && <img src={room.groupProfilePic} alt='room_profile_pic'/>}
@@ -269,10 +269,9 @@ function ChatSystem()
                                         )}
                                     </div>
                                 </li>
-                            <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(199, 199, 199)' }}></div>
 
+                                <div className='line' style={{ backgroundColor: dark ? 'rgb(78, 78, 78)' : 'rgb(199, 199, 199)' }}></div>
                             </div>
-
                         ))}
                     </ul>
                 </div>
