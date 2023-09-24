@@ -3,11 +3,16 @@ import axios from "axios";
 import '../index.css';
 import '../styles/Chat.css';
 import * as openpgp from 'openpgp/lightweight';
+import {ReactComponent as Group} from '../icons/group.svg';
+import {ReactComponent as Options} from '../icons/options.svg';
+import { useTheme } from './ThemeContext';
+
+
 
 
 function Chat(props) 
 {
-	const { roomId, socket, user} = props;
+	const { user, socket, roomId, roomName, groupProfilePic} = props;
     const [plainText, setPlainText] = useState('');
 	const [previousMessages, setPreviousMessages] = useState([]);
 	const [creator, setCreator] = useState('');
@@ -15,7 +20,8 @@ function Chat(props)
 	const [timestamp, setTimestamp] = useState(Date.now());
 	const [publicKeys, setPublicKeys] = useState([]);
     const [messages, setMessages] = useState([]);
-	const userToken = JSON.parse(localStorage.getItem('chatUserToken'));
+    const { dark, setDark } = useTheme();
+
 
 
 	useEffect(() =>
@@ -80,12 +86,6 @@ function Chat(props)
 		{
 			console.error("Error fetching data:", error);
 		}
-        // const decrypted = await Promise.all(response.data.chats.map(chat => decryptMessages(chat.message)));
-			// const chats = response.data.chats.map((chat, index) =>
-			// {
-			// 	chat.message = decrypted[index];
-			// 	return chat;
-			// });
 	}
 
 
@@ -138,7 +138,15 @@ function Chat(props)
 
 
     return (
-      	<div className='chat_parent'>
+      	<div className={dark ? 'chat_parent dark_bg' : 'chat_parent light_bg'}>
+			<div className='group_header' style={{ borderBottom: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
+				{!groupProfilePic && <Group className={dark ? 'group_profile_pic_dark' : 'group_profile_pic_light'}/>}
+				<div>
+					<h3 className={dark ? 'r_name dark_primary-font' : 'r_name light_primary-font'}>{roomName}</h3>
+					<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creator} on {timestamp}</p>
+				</div>
+				<Options className={dark ? 'options dark_hover' : 'options light_hover'}/>
+			</div>
 			<p>{roomId}</p>
 			<form>
 				{previousMessages.map((data, index) => (
