@@ -8,7 +8,12 @@ const chatRoomSchema = new mongoose.Schema(
         type: String,
         required: true,
     },
-    creator:
+    creatorName:
+    {
+        type: String,
+        required: true,
+    },
+    creatorEmail:
     {
         type: String,
         required: true,
@@ -50,6 +55,11 @@ const chatRoomSchema = new mongoose.Schema(
     chats: 
     [
         {
+            senderName:
+            {
+                type: String,
+                required: true,
+            },
             senderEmail: 
             {
                 type: String,

@@ -15,7 +15,8 @@ function Chat(props)
 	const { user, socket, roomId, roomName, groupProfilePic} = props;
     const [plainText, setPlainText] = useState('');
 	const [previousMessages, setPreviousMessages] = useState([]);
-	const [creator, setCreator] = useState('');
+	const [creatorName, setCreatorName] = useState('');
+	const [creatorEmail, setCreatorEmail] = useState('');
 	const [roomMembers, setRoomMembers] = useState([]);
 	const [timestamp, setTimestamp] = useState(Date.now());
 	const [publicKeys, setPublicKeys] = useState([]);
@@ -68,7 +69,8 @@ function Chat(props)
         {
             const response = await axios.get(`http://localhost:3000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`);
             console.log(response.data);
-			setCreator(response.data.rooms.creator);
+			setCreatorName(response.data.rooms.creatorName);
+			setCreatorEmail(response.data.rooms.creatorEmail);
 			setRoomMembers(response.data.rooms.roomMembers);
 			setTimestamp(response.data.rooms.timestamp);
 			const decrypted = await Promise.all(response.data.rooms.chats.map(chat => decryptMessages(chat.message)));
@@ -102,6 +104,7 @@ function Chat(props)
 	{
 		socket.on('receive_message', async (data) => 
 		{
+			console.log("received message", data);
 			const decrypted = await decryptMessages(data.data.message);
 			data.data.message = decrypted;
 			setMessages((messages) => [...messages, data.data]);
@@ -121,12 +124,12 @@ function Chat(props)
 				message,
 				encryptionKeys: unArmoredPublicKeys,
 			});
-			socket.emit('send_message', { roomId, message : encrypted, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
+			socket.emit('send_message', { roomId, message : encrypted, senderName: user.name, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
 			setPlainText('');
 		}
 		try
 		{
-			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message : encrypted, senderEmail: user.email, timeStamp: Date.now() });
+			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message : encrypted, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
 			console.log(response.data);
 		}
 		catch(error)
@@ -143,7 +146,7 @@ function Chat(props)
 				{!groupProfilePic && <Group className={dark ? 'group_profile_pic_dark' : 'group_profile_pic_light'}/>}
 				<div>
 					<h3 className={dark ? 'r_name dark_primary-font' : 'r_name light_primary-font'}>{roomName}</h3>
-					<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creator} on {timestamp}</p>
+					<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creatorName} on {timestamp}</p>
 				</div>
 				<Options className={dark ? 'options dark_hover' : 'options light_hover'}/>
 			</div>

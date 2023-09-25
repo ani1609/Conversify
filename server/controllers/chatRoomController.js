@@ -21,7 +21,8 @@ const createRoom = async (req, res) =>
         const newRoom = new ChatRoom(
         {
             roomId: req.body.roomId,
-            creator: user.email,
+            creatorName: user.name,
+            creatorEmail: user.email,
             roomName: req.body.roomName,
             roomMembers: [{ userEmail: user.email, armoredPublicKey : user.armoredPublicKey , joinTimestamp: Date.now() }],
         });
@@ -152,7 +153,8 @@ const getJoinedRoomsAdvancedDetails = async (req, res) =>
         }
         const simplifiedRoom = {
             chats: room.chats,
-            creator: room.creator,
+            creatorName: room.creatorName,
+            creatorEmail: room.creatorEmail,
             roomMembers: room.roomMembers,
             timestamp: room.timestamp,
         };
@@ -171,8 +173,7 @@ const uploadChat = async (req, res) =>
 {
     try 
     {
-        const { roomId, message, senderEmail, timeStamp } = req.body;
-
+        const { roomId, message, senderName, senderEmail, timeStamp } = req.body;
         const room = await ChatRoom.findOne({ roomId });
         if (!room) 
         {
@@ -181,6 +182,7 @@ const uploadChat = async (req, res) =>
 
         room.chats.push(
         {
+            senderName,
             senderEmail,
             message,
             timestamp: timeStamp || new Date(),
