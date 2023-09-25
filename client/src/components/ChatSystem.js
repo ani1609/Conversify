@@ -26,11 +26,6 @@ function ChatSystem()
     const [searchShadow, setSearchShadow] = useState(false);
 
 
-    useEffect(() =>
-    {
-        console.log("mdoe is ", dark);
-    }, [dark]);
-    
 
     const fetchDataFromProtectedAPI = async (userToken) => 
     {
@@ -300,7 +295,6 @@ function ChatSystem()
                     roomId={roomId}
                     roomName={roomName}
                     groupProfilePic={groupProfilePic}
-                    // publicKeys={publicKeys}
                 />
             }
         </div>

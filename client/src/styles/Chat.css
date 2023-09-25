@@ -1,6 +1,7 @@
 .chat_parent
 {
     width: calc(100vw - 400px);
+    transition: 0.5s ease-in-out;
 }
 
 .group_header
@@ -10,6 +11,8 @@
     height: 60px;
     box-sizing: border-box;
     padding: 0px 5px;
+    transition: 0.5s ease-in-out;
+
 }
 
 .group_header div
@@ -72,4 +75,6 @@
     cursor: pointer;
     margin-left: auto;
     border-radius: 5px;
+    transition: 0.2s ease-in-out;
 }
+
