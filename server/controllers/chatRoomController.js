@@ -21,7 +21,8 @@ const createRoom = async (req, res) =>
         const newRoom = new ChatRoom(
         {
             roomId: req.body.roomId,
-            creator: user.email,
+            creatorName: user.name,
+            creatorEmail: user.email,
             roomName: req.body.roomName,
             roomMembers: [{ userEmail: user.email, armoredPublicKey : user.armoredPublicKey , joinTimestamp: Date.now() }],
         });
@@ -80,8 +81,10 @@ const joinRoom = async (req, res) =>
 };
 
 
-const getJoinedRoomsBasicDetails = async (req, res) => {
-    try {
+const getJoinedRoomsBasicDetails = async (req, res) => 
+{
+    try 
+    {
         const token = req.headers.authorization.split(' ')[1];
         const decoded = jwt.verify(token, SECRET_KEY);
         const user = await User.findById(decoded.id);
@@ -96,9 +99,7 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
         const simplifiedRooms = await Promise.all(rooms.map(async (room) => {
             if (room.chats.length > 0 && room.chats[room.chats.length - 1].message) 
             {
-                console.log("encrypted message is ",room.chats[room.chats.length - 1]);
                 const decryptedMessage = await decryptMessage(room.chats[room.chats.length - 1].message, user.encryptedPrivateKey);
-                console.log("decrypted message is ",decryptedMessage);
                 return {
                     roomId: room.roomId,
                     roomName: room.roomName,
@@ -115,7 +116,9 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
         }));
 
         res.status(200).json({ rooms: simplifiedRooms });
-    } catch (error) {
+    } 
+    catch (error) 
+    {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
@@ -145,13 +148,13 @@ const getJoinedRoomsAdvancedDetails = async (req, res) =>
     try 
     {
         const room = await ChatRoom.findOne({ roomId: roomId });
-        console.log(room);
         if (!room) {
             return res.status(404).json({ message: "No joined rooms found" });
         }
         const simplifiedRoom = {
             chats: room.chats,
-            creator: room.creator,
+            creatorName: room.creatorName,
+            creatorEmail: room.creatorEmail,
             roomMembers: room.roomMembers,
             timestamp: room.timestamp,
         };
@@ -170,8 +173,7 @@ const uploadChat = async (req, res) =>
 {
     try 
     {
-        const { roomId, message, senderEmail, timeStamp } = req.body;
-
+        const { roomId, message, senderName, senderEmail, senderProfilePic, timestamp } = req.body;
         const room = await ChatRoom.findOne({ roomId });
         if (!room) 
         {
@@ -180,9 +182,11 @@ const uploadChat = async (req, res) =>
 
         room.chats.push(
         {
+            senderName,
             senderEmail,
+            senderProfilePic,
             message,
-            timestamp: timeStamp || new Date(),
+            timestamp: timestamp || new Date(),
         });
         await room.save();
 

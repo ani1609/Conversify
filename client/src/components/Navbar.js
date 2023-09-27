@@ -46,6 +46,72 @@ function Navbar()
         }
     }, []);
 
+    const handleSubmitPhoto = async (e) =>
+    {
+        const formData = new FormData();
+        formData.append('profilePic', e.target.files[0]);
+        console.log(formData);
+        try
+        {
+            const config = {
+                headers: {
+                Authorization: `Bearer ${userToken}`,
+                },
+            };
+            const response = await axios.post("http://localhost:3000/api/uploadProfilePic", formData, config);
+            console.log(response.data);
+            fetchDataFromProtectedAPI(userToken);
+        }
+        catch (error)
+        {
+            console.error("Error uploading profile pic:", error);
+        }
+    }
+
+
+    const handleReuploadPhoto = async (e)=>
+    {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('profilePic', e.target.files[0]);
+        try
+        {
+            const config = {
+                headers: {
+                Authorization: `Bearer ${userToken}`,
+                },
+            };
+            const response = await axios.post('http://localhost:3000/api/addNewProfilePic', formData, config);
+            console.log(response.data.user);
+            fetchDataFromProtectedAPI(userToken);
+        }
+        catch (error)
+        {
+            console.error("Error deleting photo:", error);
+        }
+    }
+
+    const handleDeleteDp = async ()=>
+    {
+        console.log("handle delete");
+        try
+        {
+            const config = {
+                headers: {
+                Authorization: `Bearer ${userToken}`,
+                },
+            };
+            const response = await axios.post('http://localhost:3000/api/deleteProfilePic',config);
+            // console.log(response.data.user);
+            fetchDataFromProtectedAPI(userToken);
+        }
+        catch (error)
+        {
+            console.error("Error deleting photo:", error);
+        }
+    }
+
+
     const handleLogout = () =>
     {
         localStorage.removeItem('chatUserToken');
@@ -64,13 +130,29 @@ function Navbar()
                 </li>
                 {!userToken && <li onClick={()=>setShowLoginForm(true)} className={dark ? 'login dark_hover dark_border' : 'login light_hover light_border'}>Log in</li>}
                 {!userToken && <li onClick={()=>setShowSignupForm(true)} className={dark ? 'signup dark_hover dark_border' : 'signup light_hover light_border'}>Sign up</li>}
-                {userToken && user?.profilePic && <li className='profile_pic_wrapper'><img src={user.profilePic} alt='profile_pic'/></li>}
-                {userToken && !user.profilePic && <li className={dark ? 'profile_icon_wrapper dark_hover dark_border' : 'profile_icon_wrapper light_hover light_border'} onMouseEnter={() => setProfileDropDown(true)}><Profile className='profile_icon'/></li>}
+                {userToken && user?.profilePic && <li className='profile_pic_wrapper' style={{ borderBottom: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }} onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(false)}><img src={`http://localhost:3000/${user.profilePic}`} alt='profile_pic'/></li>}
+                {userToken && !user.profilePic && <li className={dark ? 'profile_icon_wrapper dark_hover dark_border' : 'profile_icon_wrapper light_hover light_border'} onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(false)}><Profile className='profile_icon'/></li>}
             </ul>
             {profileDropDown &&
-                <ul className='profile_dropdown' onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(true)}>
-                    <li>Profile</li>
-                    <li onClick={handleLogout}>Log Out</li>
+                <ul className='profile_dropdown' onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(false)}>
+                    {!user.profilePic && <li>
+                        Upload DP
+                        <input type='file' className='file-input' 
+                            onChange={handleSubmitPhoto}
+                        />
+                    </li>}
+                    {user.profilePic && <li>
+                        Reupload DP
+                        <input type='file' className='file-input' 
+                            onChange={handleReuploadPhoto}
+                        />
+                    </li>}
+                    {user.profilePic && <li onClick={handleDeleteDp}>
+                        Delete DP
+                    </li>}
+                    <li onClick={handleLogout}>
+                        Log Out
+                    </li>
                 </ul>
             }
 
