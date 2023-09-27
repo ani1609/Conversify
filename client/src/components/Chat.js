@@ -6,6 +6,7 @@ import * as openpgp from 'openpgp/lightweight';
 import {ReactComponent as Group} from '../icons/group.svg';
 import {ReactComponent as Options} from '../icons/options.svg';
 import {ReactComponent as Profile} from '../icons/profile.svg';
+import {ReactComponent as Send} from '../icons/send.svg';
 import { useTheme } from './ThemeContext';
 
 
@@ -211,15 +212,16 @@ function Chat(props)
 				))}
 			</div>
 
-			<form>
+			<form className={dark ? 'form_dark' : 'form_light'}>
 				<input
 					type='text'
 					autoComplete="off"
 					value={plainText}
 					onChange={(e) => setPlainText(e.target.value)}
 					required
+					placeholder='Type a message'
 				/>
-				<button type='submit' onClick={handleSendMessage}>Send</button>
+				<button type='submit' onClick={handleSendMessage}><Send className='send_icon'/></button>
 			</form>
     	</div>
     );
