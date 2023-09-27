@@ -2,6 +2,7 @@
 {
     width: calc(100vw - 400px);
     transition: 0.5s ease-in-out;
+    box-sizing: border-box;
 }
 
 .group_header
@@ -78,3 +79,93 @@
     transition: 0.2s ease-in-out;
 }
 
+
+.message_box
+{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-sizing: border-box;
+    padding: 5px;
+}
+
+.self_message_container, .others_message_container
+{
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    max-width: 75%;
+}
+
+.self_message_container
+{
+    margin-left: auto;
+}
+
+.others_message_container
+{
+    margin-right: auto;
+}
+
+.dark_chat_box_profile_icon_icon, .light_chat_box_profile_icon_icon
+{
+    fill: var(--primary);
+    transition:  0.5s ease-in-out;
+    border-radius: 50%;
+    height: 27px;
+    width: 27px;
+    padding: 6px;
+}
+
+.dark_chat_box_profile_icon_icon
+{
+    background-color: rgb(67, 67, 67);
+}
+
+.light_chat_box_profile_icon_icon
+{
+    background-color: rgb(213, 213, 213);
+}
+
+
+.self_message_container div, .others_message_container div
+{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: var(--primary);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.sender_name
+{
+    margin: 0;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    transition: 0.5s ease-in-out;
+    letter-spacing: 0.5px;
+}
+
+.message
+{
+    margin: 0;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    transition: 0.5s ease-in-out;
+    letter-spacing: 0.5px;
+    margin-top: 5px;
+}
+
+.timestamp
+{
+    margin: 0;
+    font-size: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 7500;
+    transition: 0.5s ease-in-out;
+    letter-spacing: 0.5px;
+    text-align: right;
+}

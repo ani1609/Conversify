@@ -173,7 +173,7 @@ const uploadChat = async (req, res) =>
 {
     try 
     {
-        const { roomId, message, senderName, senderEmail, timeStamp } = req.body;
+        const { roomId, message, senderName, senderEmail, senderProfilePic, timestamp } = req.body;
         const room = await ChatRoom.findOne({ roomId });
         if (!room) 
         {
@@ -184,8 +184,9 @@ const uploadChat = async (req, res) =>
         {
             senderName,
             senderEmail,
+            senderProfilePic,
             message,
-            timestamp: timeStamp || new Date(),
+            timestamp: timestamp || new Date(),
         });
         await room.save();
 

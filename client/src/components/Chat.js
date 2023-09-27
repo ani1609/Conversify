@@ -5,6 +5,7 @@ import '../styles/Chat.css';
 import * as openpgp from 'openpgp/lightweight';
 import {ReactComponent as Group} from '../icons/group.svg';
 import {ReactComponent as Options} from '../icons/options.svg';
+import {ReactComponent as Profile} from '../icons/profile.svg';
 import { useTheme } from './ThemeContext';
 
 
@@ -124,12 +125,12 @@ function Chat(props)
 				message,
 				encryptionKeys: unArmoredPublicKeys,
 			});
-			socket.emit('send_message', { roomId, message : encrypted, senderName: user.name, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
+			socket.emit('send_message', { roomId, message : encrypted, senderName: user.name, senderProfilePic: user.profilePic? user.profilePic : '', senderEmail: user.email, timestamp: Date.now()});
 			setPlainText('');
 		}
 		try
 		{
-			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message : encrypted, senderName: user.name, senderEmail: user.email, timeStamp: Date.now() });
+			const response = await axios.post('http://localhost:3000/api/chat/upload', { roomId, message : encrypted, senderName: user.name, senderEmail: user.email, senderProfilePic: user.profilePic? user.profilePic : '', timestamp: Date.now() });
 			console.log(response.data);
 		}
 		catch(error)
@@ -137,6 +138,22 @@ function Chat(props)
 			console.error("Error in sending message ",error);
 		}
     };
+
+	function formatTimestamp(timestamp) 
+	{
+		const dateObj = new Date(timestamp);
+		const day = String(dateObj.getDate()).padStart(2, '0');
+		const month = String(dateObj.getMonth() + 1).padStart(2, '0'); 
+		const year = String(dateObj.getFullYear()).slice(-2); 
+		const hours = String(dateObj.getHours()).padStart(2, '0');
+		const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+
+		const formattedDate = `${day}/${month}/${year}`;
+		const formattedTime = `${hours}:${minutes}`;
+
+		// return `${formattedDate} ${formattedTime}`;
+		return `${formattedTime}`;
+	}
 
 
 
@@ -150,25 +167,53 @@ function Chat(props)
 				</div>
 				<Options className={dark ? 'options dark_hover' : 'options light_hover'}/>
 			</div>
-			<p>{roomId}</p>
-			<form>
+			
+			<div className='message_box'>
 				{previousMessages.map((data, index) => (
-					<div key={index} className='previous_messages'>
-						<p>PREV {data.message}</p>
-					</div>
+					data.senderEmail === user.email ? (
+						<div className='self_message_container' key={index}>
+							<div>
+								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
+								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+							</div>
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+						</div>
+					) : (
+						<div className='others_message_container' key={index}>
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+							<div>
+								<h4 className={dark ? 'sender_name dark_primary-font' : 'sender_name light_primary-font'}>{data.senderName}</h4>
+								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
+								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+							</div>
+						</div>
+					)
 				))}
-
 				{messages.map((data, index) => (
-					<div key={index} className='message'>
-						<p>RECENT {data.message}</p>
-					</div>
+					data.senderEmail === user.email ? (
+						<div className='self_message_container' key={index}>
+							<div>
+								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
+								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+							</div>
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+						</div>
+					) : (
+						<div className='others_message_container' key={index}>
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+							<div>
+								<h4 className={dark ? 'sender_name dark_primary-font' : 'sender_name light_primary-font'}>{data.senderName}</h4>
+								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
+								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+							</div>
+						</div>
+					)
 				))}
+			</div>
 
-				
-
+			<form>
 				<input
 					type='text'
-					id="message"
 					autoComplete="off"
 					value={plainText}
 					onChange={(e) => setPlainText(e.target.value)}

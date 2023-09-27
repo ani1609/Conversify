@@ -65,6 +65,10 @@ const chatRoomSchema = new mongoose.Schema(
                 type: String,
                 required: true,
             },
+            senderProfilePic:
+            {
+                type: String,
+            },
             message: 
             {
                 type: String,
