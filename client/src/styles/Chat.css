@@ -89,6 +89,7 @@
     box-sizing: border-box;
     padding: 5px;
     height: calc(100vh - 190px);
+    overflow: auto;
 }
 
 .self_message_container, .others_message_container
@@ -97,6 +98,7 @@
     justify-content: flex-start;
     gap: 5px;
     max-width: 75%;
+    opacity: 0;
 }
 
 .self_message_container
@@ -164,7 +166,7 @@
 .timestamp
 {
     margin: 0;
-    font-size: 12px;
+    font-size: 11px;
     font-family: 'Montserrat', sans-serif;
     font-weight: 7500;
     transition: 0.5s ease-in-out;
@@ -212,10 +214,12 @@
 .form_dark input
 {
     background-color: rgb(128, 128, 128);
+    color: var(--dark_primary-font);
 }
 
 .form_light input
 {
+    color: var(--light_primary-font);
     background-color: rgb(241, 241, 241);
 }
 
@@ -258,5 +262,50 @@
     width: 80%;
     cursor: pointer;
     border-radius: 5px;
-    transition: 0.2s ease-in-out;
+}
+
+
+
+.self_message_container
+{
+    animation-name: othersMessageAnimation;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes othersMessageAnimation
+{
+    0%
+    {
+        opacity: 0;
+        transform: scale(0.5) translateX(100%);
+    }
+
+    100%
+    {
+        opacity: 1;
+        transform: scale(1) translateX(0%);
+    }
+}
+
+.others_message_container
+{
+    animation-name: selfMessageAnimation;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes selfMessageAnimation
+{
+    0%
+    {
+        opacity: 0;
+        transform: scale(0.5) translateX(-100%);
+    }
+
+    100%
+    {
+        opacity: 1;
+        transform: scale(1) translateX(0%);
+    }
 }

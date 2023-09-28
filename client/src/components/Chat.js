@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import '../index.css';
 import '../styles/Chat.css';
@@ -24,7 +24,13 @@ function Chat(props)
 	const [publicKeys, setPublicKeys] = useState([]);
     const [messages, setMessages] = useState([]);
     const { dark, setDark } = useTheme();
+	const messageBoxContainerRef = useRef(null);
 
+	useEffect(() => 
+	{
+		// Scroll to the bottom of the chat container when messages change
+		messageBoxContainerRef.current.scrollTop = messageBoxContainerRef.current.scrollHeight;
+	}, [previousMessages, messages]);
 
 
 	useEffect(() =>
@@ -169,7 +175,7 @@ function Chat(props)
 				<Options className={dark ? 'options dark_hover' : 'options light_hover'}/>
 			</div>
 			
-			<div className='message_box'>
+			<div className='message_box' ref={messageBoxContainerRef}>
 				{previousMessages.map((data, index) => (
 					data.senderEmail === user.email ? (
 						<div className='self_message_container' key={index}>
