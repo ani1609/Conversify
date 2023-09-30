@@ -111,7 +111,7 @@
     margin-right: auto;
 }
 
-.dark_chat_box_profile_icon_icon, .light_chat_box_profile_icon_icon
+.dark_chat_box_profile_icon, .light_chat_box_profile_icon
 {
     fill: var(--primary);
     transition:  0.5s ease-in-out;
@@ -121,46 +121,68 @@
     padding: 6px;
 }
 
-.dark_chat_box_profile_icon_icon
+.light_chat_box_profile_icon
 {
     background-color: rgb(67, 67, 67);
 }
 
-.light_chat_box_profile_icon_icon
+.light_chat_box_profile_icon
 {
     background-color: rgb(213, 213, 213);
 }
 
 
-.self_message_container div, .others_message_container div
+.self_message_container div
+{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background-color: var(--primary);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.others_message_container>div
+{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background-color: var(--primary);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.others_message_container>div div
 {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 5px;
-    background-color: var(--primary);
-    padding: 5px;
-    border-radius: 5px;
 }
 
 .sender_name
 {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'Montserrat', sans-serif;
     font-weight: 600;
     transition: 0.5s ease-in-out;
     letter-spacing: 0.5px;
+    color: #d5d5d5;
 }
 
 .message
 {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
     font-family: 'Montserrat', sans-serif;
     font-weight: 500;
     transition: 0.5s ease-in-out;
     letter-spacing: 0.5px;
-    margin-top: 3px;
+    color: #EDEDED;
+    display: flex;
+    align-items: center;
+    
 }
 
 .timestamp
@@ -171,7 +193,11 @@
     font-weight: 7500;
     transition: 0.5s ease-in-out;
     letter-spacing: 0.5px;
-    text-align: right;
+    color: #d5d5d5;
+    display: flex;
+    align-items: end;
+    margin-right: -5px;
+    margin-bottom: -6px;
 }
 
 .form_dark, .form_light
