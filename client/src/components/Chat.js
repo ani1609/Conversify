@@ -146,7 +146,22 @@ function Chat(props)
 		}
     };
 
-	function formatTimestamp(timestamp) 
+	function formatTimestampForGrpHeader(timestamp) 
+	{
+		const dateObj = new Date(timestamp);
+		const day = String(dateObj.getDate()).padStart(2, '0');
+		const month = String(dateObj.getMonth() + 1).padStart(2, '0'); 
+		const year = String(dateObj.getFullYear()).slice(-2); 
+		const hours = String(dateObj.getHours()).padStart(2, '0');
+		const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+
+		const formattedDate = `${day}/${month}/${year}`;
+		const formattedTime = `${hours}:${minutes}`;
+
+		return `${formattedTime} ${formattedDate}`;
+	}
+
+	function formatTimestampForMsg(timestamp) 
 	{
 		const dateObj = new Date(timestamp);
 		const day = String(dateObj.getDate()).padStart(2, '0');
@@ -170,7 +185,7 @@ function Chat(props)
 				{!groupProfilePic && <Group className={dark ? 'group_profile_pic_dark' : 'group_profile_pic_light'}/>}
 				<div>
 					<h3 className={dark ? 'r_name dark_primary-font' : 'r_name light_primary-font'}>{roomName}</h3>
-					<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creatorName} on {timestamp}</p>
+					<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creatorName} on {formatTimestampForGrpHeader(timestamp)}</p>
 				</div>
 				<Options className={dark ? 'options dark_hover' : 'options light_hover'}/>
 			</div>
@@ -181,7 +196,7 @@ function Chat(props)
 						<div className='self_message_container' key={index}>
 							<div>
 								<p className='message'>{data.message}</p>
-								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
+								<p className='timestamp'>{formatTimestampForMsg(data.timestamp)}</p>
 							</div>
 							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 						</div>
@@ -193,7 +208,7 @@ function Chat(props)
 									<h4 className='sender_name'>{data.senderName}</h4>
 									<p className='message'>{data.message}</p>
 								</div>
-								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
+								<p className='timestamp'>{formatTimestampForMsg(data.timestamp)}</p>
 							</div>
 						</div>
 					)
@@ -203,7 +218,7 @@ function Chat(props)
 						<div className='self_message_container' key={index}>
 							<div>
 								<p className='message'>{data.message}</p>
-								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
+								<p className='timestamp'>{formatTimestampForMsg(data.timestamp)}</p>
 							</div>
 							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 						</div>
@@ -213,7 +228,7 @@ function Chat(props)
 							<div>
 								<h4 className='sender_name'>{data.senderName}</h4>
 								<p className='message'>{data.message}</p>
-								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
+								<p className='timestamp'>{formatTimestampForMsg(data.timestamp)}</p>
 							</div>
 						</div>
 					)
