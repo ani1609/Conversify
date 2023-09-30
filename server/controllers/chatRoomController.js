@@ -104,7 +104,7 @@ const getJoinedRoomsBasicDetails = async (req, res) =>
                     roomId: room.roomId,
                     roomName: room.roomName,
                     groupProfilePic: room.groupProfilePic,
-                    lastMessage: { senderEmail : room.chats[room.chats.length - 1].senderEmail, message: decryptedMessage, timestamp : room.chats[room.chats.length - 1].timestamp },
+                    lastMessage: { senderEmail : room.chats[room.chats.length - 1].senderEmail, senderName: room.chats[room.chats.length - 1].senderName, message: decryptedMessage, timestamp : room.chats[room.chats.length - 1].timestamp },
                 };
             }
             return {

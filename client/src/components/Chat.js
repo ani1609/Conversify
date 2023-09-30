@@ -180,18 +180,20 @@ function Chat(props)
 					data.senderEmail === user.email ? (
 						<div className='self_message_container' key={index}>
 							<div>
-								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
-								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+								<p className='message'>{data.message}</p>
+								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
 							</div>
-							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 						</div>
 					) : (
 						<div className='others_message_container' key={index}>
-							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 							<div>
-								<h4 className={dark ? 'sender_name dark_primary-font' : 'sender_name light_primary-font'}>{data.senderName}</h4>
-								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
-								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+								<div>
+									<h4 className='sender_name'>{data.senderName}</h4>
+									<p className='message'>{data.message}</p>
+								</div>
+								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
 							</div>
 						</div>
 					)
@@ -200,18 +202,18 @@ function Chat(props)
 					data.senderEmail === user.email ? (
 						<div className='self_message_container' key={index}>
 							<div>
-								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
-								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+								<p className='message'>{data.message}</p>
+								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
 							</div>
-							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 						</div>
 					) : (
 						<div className='others_message_container' key={index}>
-							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon_icon' : 'light_chat_box_profile_icon_icon'}/>}
+							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 							<div>
-								<h4 className={dark ? 'sender_name dark_primary-font' : 'sender_name light_primary-font'}>{data.senderName}</h4>
-								<p className={dark ? 'message dark_secondary-font' : 'message light_secondary-font'}>{data.message}</p>
-								<p className={dark ? 'timestamp dark_secondary-font' : 'timestamp light_secondary-font'}>{formatTimestamp(data.timestamp)}</p>
+								<h4 className='sender_name'>{data.senderName}</h4>
+								<p className='message'>{data.message}</p>
+								<p className='timestamp'>{formatTimestamp(data.timestamp)}</p>
 							</div>
 						</div>
 					)
