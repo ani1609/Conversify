@@ -225,3 +225,23 @@
     transition: 0.5s ease-in-out;
 
 }
+
+
+
+
+
+.default_asset_in_chat_container
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(100vw - 400px);
+    box-sizing: border-box;
+    transition: 0.5s ease-in-out;
+}
+
+
+.default_asset_in_chat
+{
+    width: 60%;
+}

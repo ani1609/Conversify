@@ -121,7 +121,7 @@
     padding: 6px;
 }
 
-.light_chat_box_profile_icon
+.dark_chat_box_profile_icon
 {
     background-color: rgb(67, 67, 67);
 }
@@ -174,7 +174,7 @@
 .message
 {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     font-family: 'Montserrat', sans-serif;
     font-weight: 500;
     transition: 0.5s ease-in-out;
@@ -269,6 +269,7 @@
     height: 40px;
     box-sizing: border-box;
     border-radius: 5px;
+    transition: 0.5s ease-in-out;
 }
 
 .form_dark button

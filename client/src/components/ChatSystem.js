@@ -6,6 +6,7 @@ import axios from "axios";
 import io from 'socket.io-client';
 import {ReactComponent as Group} from '../icons/group.svg';
 import { useTheme } from './ThemeContext';
+import {ReactComponent as DefaultAsset} from '../assets/default1.svg';
 const socket=io.connect("http://localhost:3000");
 
 
@@ -108,6 +109,7 @@ function ChatSystem()
             const response = await axios.post("http://localhost:3000/api/chat/createRoom", data, config);
 		    setRoomId(uniqueRoomId);
             console.log(response.data.message);
+            window.location.reload();
         }
         catch (error)
         {
@@ -139,6 +141,7 @@ function ChatSystem()
             };
             const response = await axios.post("http://localhost:3000/api/chat/joinRoom", data, config);
             console.log(response.data.message);
+            window.location.reload();
         }
         catch (error)
         {
@@ -286,6 +289,12 @@ function ChatSystem()
                     </ul>
                 </div>
             </div>
+
+            {!showChat &&
+                <div className={dark ? 'default_asset_in_chat_container dark_bg' : 'default_asset_in_chat_container light_bg'}>
+                    <DefaultAsset className='default_asset_in_chat'/>
+                </div>
+            }
 
 
             {showChat && 

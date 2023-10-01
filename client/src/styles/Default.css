@@ -1,0 +1,14 @@
+.default_parent
+{
+    height: calc(100vh - 70px);
+    width: 100vw;
+    transition: 0.5s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.deafult_asset
+{
+    width: 50%;
+}
