@@ -243,6 +243,7 @@ function Chat(props)
 					onChange={(e) => setPlainText(e.target.value)}
 					required
 					placeholder='Type a message'
+					autoFocus
 				/>
 				<button type='submit' onClick={handleSendMessage}><Send className='send_icon'/></button>
 			</form>
