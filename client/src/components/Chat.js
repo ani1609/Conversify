@@ -4,6 +4,7 @@ import '../index.css';
 import '../styles/Chat.css';
 import * as openpgp from 'openpgp/lightweight';
 import {ReactComponent as Group} from '../icons/group.svg';
+import {ReactComponent as Copy} from '../icons/copy.svg';
 import {ReactComponent as Options} from '../icons/options.svg';
 import {ReactComponent as Profile} from '../icons/profile.svg';
 import {ReactComponent as Send} from '../icons/send.svg';
@@ -23,6 +24,7 @@ function Chat(props)
 	const [timestamp, setTimestamp] = useState(Date.now());
 	const [publicKeys, setPublicKeys] = useState([]);
     const [messages, setMessages] = useState([]);
+	const [copyMessage, setCopyMessage] = useState(false);
     const { dark, setDark } = useTheme();
 	const messageBoxContainerRef = useRef(null);
 
@@ -178,16 +180,30 @@ function Chat(props)
 	}
 
 
+	const handleCopyClick = () =>
+	{
+		navigator.clipboard.writeText(roomId);
+		setCopyMessage(true);
+		setTimeout(() => setCopyMessage(false), 2000);
+	}
+
+
 
     return (
       	<div className={dark ? 'chat_parent dark_bg' : 'chat_parent light_bg'}>
 			<div className='group_header' style={{ borderBottom: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
-				{!groupProfilePic && <Group className={dark ? 'group_profile_pic_dark' : 'group_profile_pic_light'}/>}
-				<div>
-					<h3 className={dark ? 'r_name dark_primary-font' : 'r_name light_primary-font'}>{roomName}</h3>
-					<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creatorName} on {formatTimestampForGrpHeader(timestamp)}</p>
+				<div className='group_header_left'>
+					{!groupProfilePic && <Group className={dark ? 'group_profile_pic_dark' : 'group_profile_pic_light'}/>}
+					<div>
+						<h3 className={dark ? 'r_name dark_primary-font' : 'r_name light_primary-font'}>{roomName} </h3>
+						<p className={dark ? 'creator dark_secondary-font' : 'creator light_secondary-font'}>Created by {creatorName} on {formatTimestampForGrpHeader(timestamp)}</p>
+					</div>
 				</div>
-				<Options className={dark ? 'options dark_hover' : 'options light_hover'}/>
+				<div className='group_header_right'>
+					<Copy className={dark ? 'copy_icon dark_hover' : 'copy_icon light_hover'} onClick={handleCopyClick}/>
+					<Options className={dark ? 'options_icon dark_hover' : 'options_icon light_hover'}/>
+				</div>
+				{copyMessage && <p className={dark ? 'copy_message dark_secondary-font' : 'copy_message light_secondary-font'}>RoomID copied to clipboard</p>}
 			</div>
 			
 			<div className='message_box' ref={messageBoxContainerRef}>
