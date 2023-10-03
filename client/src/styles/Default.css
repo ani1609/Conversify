@@ -12,3 +12,12 @@
 {
     width: 50%;
 }
+
+
+@media only screen and (max-height: 650px)
+{
+    .deafult_asset
+    {
+        width: 45%;
+    }
+}
