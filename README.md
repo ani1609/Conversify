@@ -45,5 +45,6 @@ Before you begin, make sure you have the following software installed on your sy
 
 <img width="1440" alt="Screenshot 2023-10-03 at 2 10 23 PM" src="https://github.com/ani1609/Conversify/assets/89239354/056fd403-f371-40e5-9945-1087064ab1ab">
 
-<img width="1440" alt="Screenshot 2023-10-03 at 2 08 35 PM" src="https://github.com/ani1609/Conversify/assets/89239354/146be012-e2d9-4242-96cf-5f8ad471938a">
+<img width="1440" alt="Screenshot 2023-10-03 at 2 33 40 PM" src="https://github.com/ani1609/Conversify/assets/89239354/562577dd-34a7-4610-85bc-f5e80a0ad274">
+
 
