@@ -40,6 +40,10 @@ Before you begin, make sure you have the following software installed on your sy
 
 
 ## Screenshots
-<img width="1440" alt="Screenshot 2023-10-01 at 5 10 05 PM" src="https://github.com/ani1609/Conversify/assets/89239354/87bf0759-9652-4cb0-970c-93592dddbe32">
 
 <img width="1440" alt="Screenshot 2023-10-01 at 5 10 21 PM" src="https://github.com/ani1609/Conversify/assets/89239354/ed93a776-0fff-4ccc-a8e4-413020324bbd">
+
+<img width="1440" alt="Screenshot 2023-10-03 at 2 10 23 PM" src="https://github.com/ani1609/Conversify/assets/89239354/056fd403-f371-40e5-9945-1087064ab1ab">
+
+<img width="1440" alt="Screenshot 2023-10-03 at 2 08 35 PM" src="https://github.com/ani1609/Conversify/assets/89239354/146be012-e2d9-4242-96cf-5f8ad471938a">
+
