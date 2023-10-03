@@ -215,9 +215,9 @@ function ChatSystem()
 
     const modifyLastMessage = (lastMsg) =>
     {
-        if(lastMsg.length>30)
+        if(lastMsg.length>25)
         {
-            return lastMsg.slice(0,30) + '...';
+            return lastMsg.slice(0,25) + '...';
         }
         else
         {

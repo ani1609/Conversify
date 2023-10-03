@@ -242,8 +242,10 @@ function Chat(props)
 						<div className='others_message_container' key={index}>
 							{data.senderProfilePic ? <img src={`http://localhost:3000/${data.senderProfilePic}`} alt='profile_pic' className=''/> : <Profile className={dark ? 'dark_chat_box_profile_icon' : 'light_chat_box_profile_icon'}/>}
 							<div>
-								<h4 className='sender_name'>{data.senderName}</h4>
-								<p className='message'>{data.message}</p>
+								<div>
+									<h4 className='sender_name'>{data.senderName}</h4>
+									<p className='message'>{data.message}</p>
+								</div>
 								<p className='timestamp'>{formatTimestampForMsg(data.timestamp)}</p>
 							</div>
 						</div>

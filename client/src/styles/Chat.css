@@ -165,15 +165,14 @@
 .self_message_container, .others_message_container
 {
     display: flex;
-    justify-content: flex-start;
     gap: 5px;
-    max-width: 75%;
     opacity: 0;
 }
 
 .self_message_container
 {
     margin-left: auto;
+    justify-content: flex-end;
 }
 
 .others_message_container
@@ -210,6 +209,7 @@
     background-color: var(--primary);
     padding: 10px;
     border-radius: 5px;
+    max-width: 75%;
 }
 
 .others_message_container>div
@@ -220,6 +220,8 @@
     background-color: var(--primary);
     padding: 10px;
     border-radius: 5px;
+    max-width: 75%;
+
 }
 
 .others_message_container>div div
