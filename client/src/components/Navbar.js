@@ -128,8 +128,8 @@ function Navbar()
                 <li onClick={()=>setDark(!dark)} className={dark ? 'theme dark_hover dark_border' : 'theme light_hover light_border'}>
                         {dark ? <Dark className='dark_icon'/> : <Light className='light_icon'/>}
                 </li>
-                {!userToken && <li onClick={()=>setShowLoginForm(true)} className={dark ? 'login dark_hover dark_border' : 'login light_hover light_border'}>Log in</li>}
-                {!userToken && <li onClick={()=>setShowSignupForm(true)} className={dark ? 'signup dark_hover dark_border' : 'signup light_hover light_border'}>Sign up</li>}
+                {!userToken && <li onClick={()=>{setShowLoginForm(true); setShowSignupForm(false)}} className={dark ? 'login dark_hover dark_border' : 'login light_hover light_border'}>Log in</li>}
+                {!userToken && <li onClick={()=>{setShowSignupForm(true); setShowLoginForm(false)}} className={dark ? 'signup dark_hover dark_border' : 'signup light_hover light_border'}>Sign up</li>}
                 {userToken && user?.profilePic && <li className='profile_pic_wrapper' style={{ borderBottom: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }} onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(false)}><img src={`http://localhost:3000/${user.profilePic}`} alt='profile_pic'/></li>}
                 {userToken && !user.profilePic && <li className={dark ? 'profile_icon_wrapper dark_hover dark_border' : 'profile_icon_wrapper light_hover light_border'} onMouseEnter={() => setProfileDropDown(true)} onMouseLeave={() => setProfileDropDown(false)}><Profile className='profile_icon'/></li>}
             </ul>
