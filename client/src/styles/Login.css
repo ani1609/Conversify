@@ -8,7 +8,16 @@
     padding: 30px 50px;
     border-radius: 5px;
     transition: 0.5s ease-in-out;
-    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dark_login_form_container
+{
+    background-color: rgba(0, 0, 0, 0.823);
+}
+
+.light_login_form_container
+{
+    background-color: rgba(65, 65, 65, 0.833);
 }
 
 .dark_login_form_container h1, .light_login_form_container h1
