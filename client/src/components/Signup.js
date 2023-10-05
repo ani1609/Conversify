@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import '../index.css';
 import '../styles/Signup.css';
 import axios from "axios";
+import { useTheme } from './ThemeContext';
 import * as openpgp from 'openpgp/lightweight';
 
 function Signup()
@@ -16,6 +17,8 @@ function Signup()
         password: '',
         confirmPassword: ''
     });
+    const { dark, setDark } = useTheme();
+
 
     const generateKeyPair = async (user) =>
     {
@@ -75,7 +78,8 @@ function Signup()
 
 
     return(
-        <div className='signup_form_container'>
+        <div className={dark ? 'dark_signup_form_container' : 'light_signup_form_container'}>
+            <h1>Create Your Account</h1>
             <form onSubmit={handleSignup}>
                 <input 
                     type='text'

@@ -1,6 +1,7 @@
 import {useState, useEffect} from 'react';
 import '../index.css';
 import '../styles/Login.css';
+import { useTheme } from './ThemeContext';
 import axios from "axios";
 
 function Login()
@@ -10,6 +11,8 @@ function Login()
         email: '',
         password: ''
     });
+    const { dark, setDark } = useTheme();
+
 
 
     const handleLogin = async (e) =>
@@ -42,11 +45,12 @@ function Login()
 
 
     return(
-        <div className='login_form_container'>
+        <div className={dark ? 'dark_login_form_container' : 'light_login_form_container'}>
+            <h1>Welcome Back</h1>
             <form onSubmit={handleLogin}>
                 <input
                     type='email'
-                    placeholder='email'
+                    placeholder='Email'
                     value={loginData.email}
                     onChange={(e)=>setLoginData({...loginData, email: e.target.value})}
                     required
