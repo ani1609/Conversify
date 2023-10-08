@@ -7,6 +7,7 @@ import io from 'socket.io-client';
 import {ReactComponent as Group} from '../icons/group.svg';
 import { useTheme } from './ThemeContext';
 import {ReactComponent as DefaultAsset} from '../assets/default1.svg';
+import {ReactComponent as RightArrow} from '../icons/rightArrow.svg';
 const socket=io.connect("http://localhost:3000");
 
 
@@ -231,34 +232,44 @@ function ChatSystem()
         <div className='chatSystem_parent'>
             <div className={dark ? 'rooms_container dark_bg' : 'rooms_container light_bg'} style={{ borderRight: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
                 <div className='join_create_container' style={{ borderBottom: dark ? '1px solid rgb(78, 78, 78)' : '1px solid rgb(165, 165, 165)' }}>
-                    <button onClick={() => setShowCreateForm(true)} className={dark ? 'dark_bg dark_hover dark_border' : 'light_bg light_hover light_border'}>Create Room</button>
-                    <button onClick={() => setShowJoinForm(true)} className={dark ? 'dark_bg dark_hover dark_border ' : 'light_bg light_hover light_border'}>Join Room</button>
+                    <button onClick={() => {setShowCreateForm(true); setShowJoinForm(false)}} className={dark ? 'dark_bg dark_hover dark_border' : 'light_bg light_hover light_border'}>Create Room</button>
+                    <button onClick={() => {setShowJoinForm(true); setShowCreateForm(false)}} className={dark ? 'dark_bg dark_hover dark_border ' : 'light_bg light_hover light_border'}>Join Room</button>
 
-                    {showCreateForm && <form onSubmit={handleCreateRoom}>
-                        <label htmlFor="roomName">Enter Room Name</label>
-                        <input
-                            type='text'
-                            id="roomName"
-                            autoComplete="off"
-                            value={roomName}
-                            onChange={(e) => setRoomName(e.target.value)}
-                            required
-                        />
-                        <button type='submit'>Create Room</button>
-                    </form>}
+                    {showCreateForm && <div className='create_form_parent'>
+                        <div className={dark? 'dark_create_form_container' : 'light_create_form_container'}>
+                            <h1>Create Room</h1>
+                            <form onSubmit={handleCreateRoom}>
+                                <input
+                                    type='text'
+                                    id="roomName"
+                                    autoComplete="off"
+                                    value={roomName}
+                                    onChange={(e) => setRoomName(e.target.value)}
+                                    placeholder='Enter Room Name'
+                                    required
+                                />
+                                <button type='submit'><RightArrow className='right_arrow_icon'/></button>
+                            </form>
+                        </div>
+                    </div>}
 
-                    {showJoinForm && <form onSubmit={handleJoinRoom}>
-                        <label htmlFor="roomId">Enter Room Id</label>
-                        <input
-                            type='text'
-                            id="roomId"
-                            autoComplete="off"
-                            value={roomId}
-                            onChange={(e) => setRoomId(e.target.value)}
-                            required
-                        />
-                        <button type='submit'>Join Room</button>
-                    </form>}
+                    {showJoinForm && <div className='join_form_parent'>
+                        <div className={dark? 'dark_join_form_container' : 'light_join_form_container'}>
+                            <h1>Join Room</h1>
+                            <form onSubmit={handleJoinRoom}>
+                                <input
+                                    type='text'
+                                    id="roomId"
+                                    autoComplete="off"
+                                    value={roomId}
+                                    onChange={(e) => setRoomId(e.target.value)}
+                                    placeholder='Enter Room Id'
+                                    required
+                                />
+                                <button type='submit'><RightArrow className='right_arrow_icon'/></button>
+                            </form>
+                        </div>
+                    </div>}
                 </div>
 
                 <div className='rooms_list'>
