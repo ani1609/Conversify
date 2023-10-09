@@ -235,8 +235,8 @@ function ChatSystem()
                     <button onClick={() => {setShowCreateForm(true); setShowJoinForm(false)}} className={dark ? 'dark_bg dark_hover dark_border' : 'light_bg light_hover light_border'}>Create Room</button>
                     <button onClick={() => {setShowJoinForm(true); setShowCreateForm(false)}} className={dark ? 'dark_bg dark_hover dark_border ' : 'light_bg light_hover light_border'}>Join Room</button>
 
-                    {showCreateForm && <div className='create_form_parent'>
-                        <div className={dark? 'dark_create_form_container' : 'light_create_form_container'}>
+                    {showCreateForm && <div className='create_form_parent' onClick={()=> setShowCreateForm(false)}>
+                        <div className={dark? 'dark_create_form_container' : 'light_create_form_container'} onClick={(e)=> e.stopPropagation()}>
                             <h1>Create Room</h1>
                             <form onSubmit={handleCreateRoom}>
                                 <input
@@ -253,8 +253,8 @@ function ChatSystem()
                         </div>
                     </div>}
 
-                    {showJoinForm && <div className='join_form_parent'>
-                        <div className={dark? 'dark_join_form_container' : 'light_join_form_container'}>
+                    {showJoinForm && <div className='join_form_parent' onClick={()=> setShowJoinForm(false)}>
+                        <div className={dark? 'dark_join_form_container' : 'light_join_form_container'} onClick={(e)=> e.stopPropagation()}>
                             <h1>Join Room</h1>
                             <form onSubmit={handleJoinRoom}>
                                 <input

@@ -45,7 +45,7 @@ function Login()
 
 
     return(
-        <div className={dark ? 'dark_login_form_container' : 'light_login_form_container'}>
+        <div className={dark ? 'dark_login_form_container' : 'light_login_form_container'} onClick={(e)=> e.stopPropagation()}>
             <h1>Welcome Back</h1>
             <form onSubmit={handleLogin}>
                 <input

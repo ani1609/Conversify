@@ -111,6 +111,14 @@ function Navbar()
         }
     }
 
+    const handleParentClick = (e) =>
+    {
+        if (e.target === e.currentTarget)
+        {
+            setShowLoginForm(false);
+        }
+    }
+
 
     const handleLogout = () =>
     {
@@ -157,11 +165,11 @@ function Navbar()
             }
 
             {showLoginForm &&
-                <div className='login_parent'><Login /></div>
+                <div className='login_parent' onClick={()=> setShowLoginForm(false)}><Login /></div>
             }
 
             {showSignupForm &&
-                <div className='signup_parent'><Signup/></div>
+                <div className='signup_parent' onClick={()=> setShowSignupForm(false)}><Signup/></div>
             }
         </div>
     );
