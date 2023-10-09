@@ -31,7 +31,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 500ms;
+    animation-delay: 300ms;
 }
 
 
@@ -99,7 +99,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 1500ms;
+    animation-delay: 1300ms;
 }
 
 .dark_signup_form_container form input:nth-child(1), .light_signup_form_container form input:nth-child(1)
@@ -107,7 +107,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 700ms;
+    animation-delay: 500ms;
 }
 
 .dark_signup_form_container form input:nth-child(2), .light_signup_form_container form input:nth-child(2)
@@ -115,7 +115,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 900ms;
+    animation-delay: 700ms;
 }
 
 .dark_signup_form_container form input:nth-child(3), .light_signup_form_container form input:nth-child(3)
@@ -123,7 +123,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 1100ms;
+    animation-delay: 900ms;
 }
 
 .dark_signup_form_container form input:nth-child(4), .light_signup_form_container form input:nth-child(4)
@@ -131,7 +131,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 1300ms;
+    animation-delay: 1100ms;
 }
 
 

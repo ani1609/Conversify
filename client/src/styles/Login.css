@@ -31,7 +31,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 500ms;
+    animation-delay: 300ms;
 }
 
 
@@ -99,7 +99,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 1100ms;
+    animation-delay: 900ms;
 }
 
 
@@ -108,7 +108,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 700ms;
+    animation-delay: 500ms;
 }
 
 .dark_login_form_container form input:nth-child(2), .light_login_form_container form input:nth-child(2)
@@ -116,7 +116,7 @@
     animation-name: fadeInSlideIn;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
-    animation-delay: 900ms;
+    animation-delay: 700ms;
 }
 
 @keyframes fadeInSlideIn

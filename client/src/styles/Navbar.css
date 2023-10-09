@@ -136,7 +136,7 @@
     backdrop-filter: blur(5px);
     opacity: 0;
     animation-name: fadeIn;
-    animation-duration: 0.5s;
+    animation-duration: 0.3s;
     animation-fill-mode: forwards;
 }
 

@@ -49,6 +49,22 @@
     left: 0;
     backdrop-filter: blur(5px);
     z-index: 10;
+    animation-name: fadeIn;
+    animation-duration: 0.3s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn
+{
+    0%
+    {
+        opacity: 0;
+    }
+
+    100%
+    {
+        opacity: 1;
+    }
 }
 
 .create_form_parent::before, .join_form_parent::before
@@ -96,6 +112,11 @@
     font-weight: 600;
     font-size: 35px;
     margin: 0;
+    opacity: 0;
+    animation-name: fadeInSlideIn;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-delay: 300ms;
 }
 
 .dark_create_room_form_wrapper form, .dark_join_room_form_wrapper form
@@ -136,6 +157,11 @@
     border-radius: 5px;
     transition: 0.5s ease-in-out;
     width: 100%;
+    opacity: 0;
+    animation-name: fadeInSlideIn;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-delay: 500ms;
 }
 
 .dark_create_form_container form input,
@@ -177,6 +203,11 @@
     justify-content: center;
     align-items: center;
     border: 0;
+    opacity: 0;
+    animation-name: fadeInSlideIn;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-delay: 500ms;
 }
 
 .dark_create_form_container button, .dark_join_form_container button
@@ -195,6 +226,21 @@
     height: 37px;
     width: 50px;
     cursor: pointer;
+}
+
+@keyframes fadeInSlideIn
+{
+    0%
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100%
+    {
+        opacity: 1;
+        transform: translateY(0px);
+    }
 }
 
 
