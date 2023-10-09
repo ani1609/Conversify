@@ -78,7 +78,7 @@ function Signup()
 
 
     return(
-        <div className={dark ? 'dark_signup_form_container' : 'light_signup_form_container'}>
+        <div className={dark ? 'dark_signup_form_container' : 'light_signup_form_container'} onClick={(e)=> e.stopPropagation()}>
             <h1>Create Your Account</h1>
             <form onSubmit={handleSignup}>
                 <input 
