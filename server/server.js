@@ -22,6 +22,10 @@ connectDb();
 
 const server=http.createServer(app);
 
+app.get('/', (req, res) => {
+    res.send('Hello, worlddd!');
+});
+
 
 // --------user controllers--------
 // deleteUsers();

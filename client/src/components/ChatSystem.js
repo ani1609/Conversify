@@ -57,7 +57,7 @@ function ChatSystem()
                 },
             };
             const response = await axios.get("http://localhost:3000/api/user/getJoinedRoomsBasicDetails", config);
-            console.log(response.data.rooms);
+            // console.log(response.data.rooms);
             setJoinedRooms(response.data.rooms);
         }
         catch (error)
@@ -156,12 +156,12 @@ function ChatSystem()
     const handleRoomClick = (roomId, roomName) =>
     {
         setRoomId(roomId);
-        console.log("clicked room id is ",roomId);
+        // console.log("clicked room id is ",roomId);
         setRoomName(roomName);
-        console.log("clicked room name is ",roomName);
+        // console.log("clicked room name is ",roomName);
         const groupProfilePic = joinedRooms.find((room) => room.roomId === roomId).groupProfilePic;
         setGroupProfilePic(groupProfilePic);
-        console.log("clicked room profile pic is ",groupProfilePic);
+        // console.log("clicked room profile pic is ",groupProfilePic);
 
         // getPublicKeys(roomId);
         socket.emit('join_room', { roomId : roomId, user});

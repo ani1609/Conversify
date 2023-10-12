@@ -48,7 +48,7 @@ function Chat(props)
 
 	useEffect(() => 
 	{
-		console.log("roomClick is true, setting room messages to null");
+		// console.log("roomClick is true, setting room messages to null");
 		setMessages([]);
 	}, [roomId]);
 
@@ -74,11 +74,11 @@ function Chat(props)
 
 	const getJoinedRoomsAdvancedDetails = async (roomId) =>
 	{
-		console.log("getJoinedRoomsAdvancedDetails called ",roomId);
+		// console.log("getJoinedRoomsAdvancedDetails called ",roomId);
 		try
         {
             const response = await axios.get(`http://localhost:3000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`);
-            console.log(response.data);
+            // console.log(response.data);
 			setCreatorName(response.data.rooms.creatorName);
 			setCreatorEmail(response.data.rooms.creatorEmail);
 			setRoomMembers(response.data.rooms.roomMembers);
@@ -91,8 +91,8 @@ function Chat(props)
 			});
 			setPreviousMessages(chats);
 			setPublicKeys(response.data.rooms.roomMembers.map(member => member.armoredPublicKey));
-			console.log("chats are ",chats);
-			console.log("encrypted chats are ",response.data.rooms.chats);
+			// console.log("chats are ",chats);
+			// console.log("encrypted chats are ",response.data.rooms.chats);
         }
 		catch (error)
 		{
