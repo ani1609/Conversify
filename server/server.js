@@ -57,9 +57,6 @@ app.post('/api/uploadProfilePic', upload.single('profilePic'), uploadProfilePic)
 app.post('/api/deleteProfilePic', deleteProfilePic);
 app.post('/api/addNewProfilePic', upload.single('profilePic'), addNewProfilePic);
 
-
-
-
 const io=new  Server(server,{
     cors: {
         origin: "http://localhost:3001",
