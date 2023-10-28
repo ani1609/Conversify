@@ -16,12 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use('/uploads', express.static('uploads'));
 
-
 connectDb();
 
-
 const server=http.createServer(app);
-
 
 // --------user controllers--------
 // deleteUsers();
@@ -59,9 +56,6 @@ const upload=multer({storage: storage});
 app.post('/api/uploadProfilePic', upload.single('profilePic'), uploadProfilePic);
 app.post('/api/deleteProfilePic', deleteProfilePic);
 app.post('/api/addNewProfilePic', upload.single('profilePic'), addNewProfilePic);
-
-
-
 
 const io=new  Server(server,{
     cors: {
