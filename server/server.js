@@ -16,16 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use('/uploads', express.static('uploads'));
 
-
 connectDb();
 
-
 const server=http.createServer(app);
-
-app.get('/', (req, res) => {
-    res.send('Hello, worlddd!');
-});
-
 
 // --------user controllers--------
 // deleteUsers();
@@ -45,7 +38,6 @@ app.post('/api/chat/joinRoom', joinRoom);
 app.get('/api/user/getJoinedRoomsBasicDetails', getJoinedRoomsBasicDetails);
 app.get('/api/chat/getJoinedRoomsAdvancedDetails', getJoinedRoomsAdvancedDetails);
 
-
 // --------image controllers--------
 const storage=multer.diskStorage(
 {
@@ -63,9 +55,6 @@ const upload=multer({storage: storage});
 app.post('/api/uploadProfilePic', upload.single('profilePic'), uploadProfilePic);
 app.post('/api/deleteProfilePic', deleteProfilePic);
 app.post('/api/addNewProfilePic', upload.single('profilePic'), addNewProfilePic);
-
-
-
 
 const io=new  Server(server,{
     cors: {
