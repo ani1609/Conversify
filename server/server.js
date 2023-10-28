@@ -16,12 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use('/uploads', express.static('uploads'));
 
-
 connectDb();
 
-
 const server=http.createServer(app);
-
 
 // --------user controllers--------
 // deleteUsers();
