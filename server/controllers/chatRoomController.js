@@ -100,6 +100,7 @@ const getJoinedRoomsBasicDetails = async (req, res) =>
             if (room.chats.length > 0 && room.chats[room.chats.length - 1].message) 
             {
                 const decryptedMessage = await decryptMessage(room.chats[room.chats.length - 1].message, user.encryptedPrivateKey);
+                console.log("decryptedMessage: ", decryptedMessage);
                 return {
                     roomId: room.roomId,
                     roomName: room.roomName,
@@ -138,7 +139,7 @@ async function decryptMessage(encryptedMessage, privateKey)
     catch (error) 
     {
         console.error("Error in decrypting message: ", error);
-        return "Error: Message decryption failed";
+        return undefined;
     }
 }
 
