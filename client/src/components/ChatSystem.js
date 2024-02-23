@@ -295,6 +295,7 @@ function ChatSystem()
                                             {room.lastMessage && room.lastMessage.message === undefined && <p className={dark ? 'tap_to_chat dark_secondary-font' : 'tap_to_chat light_secondary-font'}>Tap to start chat</p>}
                                             {room.lastMessage && room.lastMessage.message !== undefined && <p className={dark ? 'last_message dark_secondary-font' : 'last_message light_secondary-font'}>{room.lastMessage.senderName}: {modifyLastMessage(room.lastMessage.message)}</p>}
                                         </div>
+                                        
                                         {room.lastMessage?.timestamp && (
                                             <p className={dark ? 'last_msg_timestamp dark_secondary-font' : 'last_msg_timestamp light_secondary-font'}>
                                                 {isToday(new Date(room.lastMessage.timestamp))
