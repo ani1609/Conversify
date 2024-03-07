@@ -25,7 +25,7 @@ export function ThemeProvider({ children })
 
     return (
         <ThemeContext.Provider value={{ dark, setDark }}>
-        {children}
+            {children}
         </ThemeContext.Provider>
     );
 }
