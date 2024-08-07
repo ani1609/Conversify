@@ -1,3 +1,4 @@
+const { required } = require("joi");
 const mongoose = require("mongoose");
 
 const chatRoomSchema = new mongoose.Schema({
@@ -5,26 +6,27 @@ const chatRoomSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  creatorName: {
-    type: String,
-    required: true,
-  },
-  creatorEmail: {
-    type: String,
-    required: true,
-  },
   roomName: {
     type: String,
     required: true,
   },
+  groupProfilePic: {
+    type: String,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   roomMembers: [
     {
-      userEmail: {
-        type: String,
-        required: true,
-      },
-      armoredPublicKey: {
-        type: String,
+      member: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
       },
       joinTimestamp: {
@@ -33,25 +35,12 @@ const chatRoomSchema = new mongoose.Schema({
       },
     },
   ],
-  groupProfilePic: {
-    type: String,
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
   chats: [
     {
-      senderName: {
-        type: String,
+      sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
-      },
-      senderEmail: {
-        type: String,
-        required: true,
-      },
-      senderProfilePic: {
-        type: String,
       },
       message: {
         type: String,

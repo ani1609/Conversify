@@ -4,8 +4,6 @@ const authenticateJWT = require("./middlewares/authenticateJWT");
 const {
   login,
   signup,
-  uploadRoomId,
-  getRoomId,
   editUserInfo,
   changePassword,
   deleteUsers,
@@ -16,7 +14,6 @@ const {
   getJoinedRoomsBasicDetails,
   getJoinedRoomsAdvancedDetails,
   uploadChat,
-  getChat,
   deleteChats,
 } = require("./controllers/chatRoomController");
 const {
@@ -57,7 +54,6 @@ app.get("/api/user", authenticateJWT, (req, res) => {
 app.post("/api/chat/createRoom", authenticateJWT, createRoom);
 app.post("/api/chat/joinRoom", authenticateJWT, joinRoom);
 app.post("/api/chat/uploadChat", authenticateJWT, uploadChat);
-app.post("/api/chat/getChat", authenticateJWT, getChat);
 app.get(
   "/api/user/getJoinedRoomsBasicDetails",
   authenticateJWT,

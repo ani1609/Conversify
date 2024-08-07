@@ -54,7 +54,7 @@ function Chat(props) {
         });
         return decrypted;
       } catch (error) {
-        // console.error("Error in decrypting message ",error);
+        console.error("Error in decrypting message ", error);
       }
     },
     [user.encryptedPrivateKey]
@@ -73,24 +73,24 @@ function Chat(props) {
           `http://localhost:4000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`,
           config
         );
-        console.log(response.data);
-        setCreatorName(response.data.rooms.creatorName);
-        setTimestamp(response.data.rooms.timestamp);
+        console.log("the advanced details are ", response.data);
+        setCreatorName(response.data.room.creatorName);
+        setTimestamp(response.data.room.timestamp);
         const decrypted = await Promise.all(
-          response.data.rooms.chats.map((chat) => decryptMessages(chat.message))
+          response.data.room.chats.map((chat) => decryptMessages(chat.message))
         );
-        const chats = response.data.rooms.chats.map((chat, index) => {
+        const chats = response.data.room.chats.map((chat, index) => {
           chat.message = decrypted[index];
           return chat;
         });
         setPreviousMessages(chats);
         setPublicKeys(
-          response.data.rooms.roomMembers.map(
+          response.data.room.roomMembers.map(
             (member) => member.armoredPublicKey
           )
         );
         console.log("chats are ", chats);
-        console.log("encrypted chats are ", response.data.rooms.chats);
+        console.log("encrypted chats are ", response.data.room.chats);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -116,6 +116,7 @@ function Chat(props) {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     let encrypted;
+    console.log("the public keys are ", publicKeys);
     if (plainText && user && user.name && publicKeys) {
       const unArmoredPublicKeys = await Promise.all(
         publicKeys.map((armoredKey) =>
