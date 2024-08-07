@@ -25,7 +25,7 @@ function Navbar() {
         },
       };
       const response = await axios.get(
-        "http://localhost:3000/api/user",
+        "http://localhost:4000/api/user",
         config
       );
       setUser(response.data.user);
@@ -52,7 +52,7 @@ function Navbar() {
         },
       };
       const response = await axios.post(
-        "http://localhost:3000/api/uploadProfilePic",
+        "http://localhost:4000/api/uploadProfilePic",
         formData,
         config
       );
@@ -74,7 +74,7 @@ function Navbar() {
         },
       };
       await axios.post(
-        "http://localhost:3000/api/addNewProfilePic",
+        "http://localhost:4000/api/addNewProfilePic",
         formData,
         config
       );
@@ -92,20 +92,17 @@ function Navbar() {
           Authorization: `Bearer ${userToken}`,
         },
       };
-      await axios.post("http://localhost:3000/api/deleteProfilePic", config);
+      console.log(config);
+      await axios.post(
+        "http://localhost:4000/api/deleteProfilePic",
+        {},
+        config
+      );
       fetchDataFromProtectedAPI(userToken);
     } catch (error) {
       console.error("Error deleting photo:", error);
     }
   };
-
-  // const handleParentClick = (e) =>
-  // {
-  //     if (e.target === e.currentTarget)
-  //     {
-  //         setShowLoginForm(false);
-  //     }
-  // }
 
   const handleLogout = () => {
     localStorage.removeItem("chatUserToken");
@@ -180,7 +177,7 @@ function Navbar() {
             onMouseLeave={() => setProfileDropDown(false)}
           >
             <img
-              src={`http://localhost:3000/${user.profilePic}`}
+              src={`http://localhost:4000/${user.profilePic}`}
               alt="profile_pic"
             />
           </li>

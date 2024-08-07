@@ -12,6 +12,7 @@ import { useTheme } from "./ThemeContext";
 
 function Chat(props) {
   const { user, socket, roomId, roomName, groupProfilePic } = props;
+  const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [plainText, setPlainText] = useState("");
   const [previousMessages, setPreviousMessages] = useState([]);
   const [creatorName, setCreatorName] = useState("");
@@ -39,7 +40,6 @@ function Chat(props) {
   }, [socket]);
 
   useEffect(() => {
-    console.log("roomClick is true, setting room messages to null");
     setMessages([]);
   }, [roomId]);
 
@@ -62,10 +62,16 @@ function Chat(props) {
 
   const getJoinedRoomsAdvancedDetails = useCallback(
     async (roomId) => {
-      console.log("getJoinedRoomsAdvancedDetails called ", roomId);
       try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        };
+
         const response = await axios.get(
-          `http://localhost:3000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`
+          `http://localhost:4000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`,
+          config
         );
         console.log(response.data);
         setCreatorName(response.data.rooms.creatorName);
@@ -89,7 +95,7 @@ function Chat(props) {
         console.error("Error fetching data:", error);
       }
     },
-    [decryptMessages]
+    [userToken, decryptMessages]
   );
 
   useEffect(() => {
@@ -132,8 +138,14 @@ function Chat(props) {
       setPlainText("");
     }
     try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+
       const response = await axios.post(
-        "http://localhost:3000/api/chat/upload",
+        "http://localhost:4000/api/chat/uploadChat",
         {
           roomId,
           message: encrypted,
@@ -141,7 +153,8 @@ function Chat(props) {
           senderEmail: user.email,
           senderProfilePic: user.profilePic ? user.profilePic : "",
           timestamp: Date.now(),
-        }
+        },
+        config
       );
       console.log(response.data);
     } catch (error) {
@@ -255,7 +268,7 @@ function Chat(props) {
                 </div>
                 {data.senderProfilePic ? (
                   <img
-                    src={`http://localhost:3000/${data.senderProfilePic}`}
+                    src={`http://localhost:4000/${data.senderProfilePic}`}
                     alt="profile_pic"
                   />
                 ) : (
@@ -272,7 +285,7 @@ function Chat(props) {
               <div className="others_message_container" key={index}>
                 {data.senderProfilePic ? (
                   <img
-                    src={`http://localhost:3000/${data.senderProfilePic}`}
+                    src={`http://localhost:4000/${data.senderProfilePic}`}
                     alt="profile_pic"
                   />
                 ) : (
@@ -309,7 +322,7 @@ function Chat(props) {
                 </div>
                 {data.senderProfilePic ? (
                   <img
-                    src={`http://localhost:3000/${data.senderProfilePic}`}
+                    src={`http://localhost:4000/${data.senderProfilePic}`}
                     alt="profile_pic"
                   />
                 ) : (
@@ -326,7 +339,7 @@ function Chat(props) {
               <div className="others_message_container" key={index}>
                 {data.senderProfilePic ? (
                   <img
-                    src={`http://localhost:3000/${data.senderProfilePic}`}
+                    src={`http://localhost:4000/${data.senderProfilePic}`}
                     alt="profile_pic"
                   />
                 ) : (

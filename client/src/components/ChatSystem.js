@@ -8,7 +8,7 @@ import { ReactComponent as Group } from "../icons/group.svg";
 import { useTheme } from "./ThemeContext";
 import { ReactComponent as DefaultAsset } from "../assets/default1.svg";
 import { ReactComponent as RightArrow } from "../icons/rightArrow.svg";
-const socket = io.connect("http://localhost:3000");
+const socket = io.connect("http://localhost:4000");
 
 function ChatSystem() {
   const { dark } = useTheme();
@@ -33,7 +33,7 @@ function ChatSystem() {
         },
       };
       const response = await axios.get(
-        "http://localhost:3000/api/user",
+        "http://localhost:4000/api/user",
         config
       );
       setUser(response.data.user);
@@ -50,7 +50,7 @@ function ChatSystem() {
         },
       };
       const response = await axios.get(
-        "http://localhost:3000/api/user/getJoinedRoomsBasicDetails",
+        "http://localhost:4000/api/user/getJoinedRoomsBasicDetails",
         config
       );
       console.log(response.data.rooms);
@@ -93,7 +93,7 @@ function ChatSystem() {
         roomName: roomName,
       };
       const response = await axios.post(
-        "http://localhost:3000/api/chat/createRoom",
+        "http://localhost:4000/api/chat/createRoom",
         data,
         config
       );
@@ -122,7 +122,7 @@ function ChatSystem() {
         roomId: roomId,
       };
       const response = await axios.post(
-        "http://localhost:3000/api/chat/joinRoom",
+        "http://localhost:4000/api/chat/joinRoom",
         data,
         config
       );
@@ -137,14 +137,11 @@ function ChatSystem() {
 
   const handleRoomClick = (roomId, roomName) => {
     setRoomId(roomId);
-    console.log("clicked room id is ", roomId);
     setRoomName(roomName);
-    console.log("clicked room name is ", roomName);
     const groupProfilePic = joinedRooms.find(
       (room) => room.roomId === roomId
     ).groupProfilePic;
     setGroupProfilePic(groupProfilePic);
-    console.log("clicked room profile pic is ", groupProfilePic);
 
     // getPublicKeys(roomId);
     socket.emit("join_room", { roomId: roomId, user });
