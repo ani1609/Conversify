@@ -38,7 +38,7 @@ function Signup() {
         return;
       }
       const response = await axios.post(
-        "http://localhost:3000/api/users/signup",
+        "http://localhost:4000/api/users/signup",
         {
           name: signupData.name,
           email: signupData.email,

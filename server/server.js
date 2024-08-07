@@ -1,9 +1,9 @@
 const express = require("express");
 const connectDb = require("./configDb/MongoDb");
+const authenticateJWT = require("./middlewares/authenticateJWT");
 const {
   login,
   signup,
-  authenticateJWT,
   uploadRoomId,
   getRoomId,
   editUserInfo,
@@ -30,7 +30,7 @@ const cors = require("cors");
 const multer = require("multer");
 
 const app = express();
-const port = 3000;
+const port = 4000;
 
 app.use(cors());
 app.use(express.json());
@@ -54,13 +54,18 @@ app.get("/api/user", authenticateJWT, (req, res) => {
 
 // --------chatRoom controllers--------
 // deleteChats();
-app.post("/api/chat/upload", uploadChat);
-app.post("/api/chat/getChat", getChat);
-app.post("/api/chat/createRoom", createRoom);
-app.post("/api/chat/joinRoom", joinRoom);
-app.get("/api/user/getJoinedRoomsBasicDetails", getJoinedRoomsBasicDetails);
+app.post("/api/chat/createRoom", authenticateJWT, createRoom);
+app.post("/api/chat/joinRoom", authenticateJWT, joinRoom);
+app.post("/api/chat/uploadChat", authenticateJWT, uploadChat);
+app.post("/api/chat/getChat", authenticateJWT, getChat);
+app.get(
+  "/api/user/getJoinedRoomsBasicDetails",
+  authenticateJWT,
+  getJoinedRoomsBasicDetails
+);
 app.get(
   "/api/chat/getJoinedRoomsAdvancedDetails",
+  authenticateJWT,
   getJoinedRoomsAdvancedDetails
 );
 
@@ -79,19 +84,21 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 app.post(
   "/api/uploadProfilePic",
+  authenticateJWT,
   upload.single("profilePic"),
   uploadProfilePic
 );
-app.post("/api/deleteProfilePic", deleteProfilePic);
+app.post("/api/deleteProfilePic", authenticateJWT, deleteProfilePic);
 app.post(
   "/api/addNewProfilePic",
+  authenticateJWT,
   upload.single("profilePic"),
   addNewProfilePic
 );
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3001",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });

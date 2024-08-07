@@ -1,18 +1,11 @@
 const ChatRoom = require("../models/chatRoom");
-const { User } = require("../models/user");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { SECRET_KEY } = process.env;
 const openpgp = require("openpgp");
 
 const createRoom = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const user = req.user;
+
     const newRoom = new ChatRoom({
       roomId: req.body.roomId,
       creatorName: user.name,
@@ -44,18 +37,12 @@ const createRoom = async (req, res) => {
 
 const joinRoom = async (req, res) => {
   try {
+    const user = req.user;
+
     const room = await ChatRoom.findOne({ roomId: req.body.roomId });
 
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
-    }
-
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(decoded.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
     }
 
     const isMember = room.roomMembers.some(
@@ -79,9 +66,7 @@ const joinRoom = async (req, res) => {
 
 const getJoinedRoomsBasicDetails = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const user = await User.findById(decoded.id);
+    const user = req.user;
     const email = user.email;
     const rooms = await ChatRoom.find({ "roomMembers.userEmail": email });
 
