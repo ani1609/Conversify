@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import "../index.css";
 import "../styles/Navbar.css";
@@ -9,37 +9,13 @@ import { useTheme } from "./ThemeContext";
 import { ReactComponent as Light } from "../icons/light_mode.svg";
 import { ReactComponent as Dark } from "../icons/dark_mode.svg";
 
-function Navbar() {
+function Navbar(props) {
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
-  const [user, setUser] = useState({});
+  const { user } = props;
   const { dark, setDark } = useTheme();
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [profileDropDown, setProfileDropDown] = useState(false);
-
-  const fetchDataFromProtectedAPI = async (userToken) => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      };
-      const response = await axios.get(
-        "http://localhost:4000/api/user",
-        config
-      );
-      setUser(response.data.user);
-      console.log(response.data.user);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (userToken) {
-      fetchDataFromProtectedAPI(userToken);
-    }
-  }, [userToken]);
 
   const handleSubmitPhoto = async (e) => {
     const formData = new FormData();
@@ -57,7 +33,6 @@ function Navbar() {
         config
       );
       console.log(response.data);
-      fetchDataFromProtectedAPI(userToken);
     } catch (error) {
       console.error("Error uploading profile pic:", error);
     }
@@ -78,7 +53,6 @@ function Navbar() {
         formData,
         config
       );
-      fetchDataFromProtectedAPI(userToken);
     } catch (error) {
       console.error("Error deleting photo:", error);
     }
@@ -98,7 +72,6 @@ function Navbar() {
         {},
         config
       );
-      fetchDataFromProtectedAPI(userToken);
     } catch (error) {
       console.error("Error deleting photo:", error);
     }
@@ -106,7 +79,6 @@ function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("chatUserToken");
-    setUser(null);
     window.location.reload();
   };
 

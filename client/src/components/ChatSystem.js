@@ -10,7 +10,7 @@ import { ReactComponent as DefaultAsset } from "../assets/default1.svg";
 import { ReactComponent as RightArrow } from "../icons/rightArrow.svg";
 const socket = io.connect("http://localhost:4000");
 
-function ChatSystem() {
+function ChatSystem(props) {
   const { dark } = useTheme();
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -20,27 +20,10 @@ function ChatSystem() {
   const [groupProfilePic, setGroupProfilePic] = useState("");
   const [joinedRooms, setJoinedRooms] = useState([]);
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
-  const [user, setUser] = useState({});
+  const { user } = props;
   const [searchQuery, setSearchQuery] = useState("");
   const roomsListRef = useRef(null);
   const [searchShadow, setSearchShadow] = useState(false);
-
-  const fetchDataFromProtectedAPI = async (userToken) => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      };
-      const response = await axios.get(
-        "http://localhost:4000/api/user",
-        config
-      );
-      setUser(response.data.user);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
 
   const getJoinedRoomsBasicDetails = async (userToken) => {
     try {
@@ -62,7 +45,6 @@ function ChatSystem() {
 
   useEffect(() => {
     if (userToken) {
-      fetchDataFromProtectedAPI(userToken);
       getJoinedRoomsBasicDetails(userToken);
     }
   }, [userToken]);

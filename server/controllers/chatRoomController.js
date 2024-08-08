@@ -15,6 +15,7 @@ const createRoom = async (req, res) => {
       roomMembers: [
         {
           member: user._id,
+          isAdmin: true,
           joinTimestamp: Date.now(),
         },
       ],
@@ -154,6 +155,7 @@ const getJoinedRoomsAdvancedDetails = async (req, res) => {
         profilePic: member.member.profilePic,
         armoredPublicKey: member.member.armoredPublicKey,
         joinTimestamp: member.joinTimestamp,
+        isAdmin: member.isAdmin,
       })),
       timestamp: room.timestamp,
       roomId: room.roomId,

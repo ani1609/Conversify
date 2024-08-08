@@ -4,11 +4,11 @@ import "../index.css";
 import "../styles/Chat.css";
 import * as openpgp from "openpgp/lightweight";
 import { ReactComponent as Group } from "../icons/group.svg";
-import { ReactComponent as Copy } from "../icons/copy.svg";
 import { ReactComponent as Options } from "../icons/options.svg";
 import { ReactComponent as Profile } from "../icons/profile.svg";
 import { ReactComponent as Send } from "../icons/send.svg";
 import { useTheme } from "./ThemeContext";
+import RoomMembers from "./RoomMembers";
 
 function Chat(props) {
   const { user, socket, roomId, roomName, groupProfilePic } = props;
@@ -17,10 +17,14 @@ function Chat(props) {
   const [previousMessages, setPreviousMessages] = useState([]);
   const [creatorName, setCreatorName] = useState("");
   const [timestamp, setTimestamp] = useState(Date.now());
+  const [roomMembers, setRoomMembers] = useState([]);
   const [publicKeys, setPublicKeys] = useState([]);
   const [messages, setMessages] = useState([]);
   const [copyMessage, setCopyMessage] = useState(false);
   const { dark } = useTheme();
+  const [showChatRoomOptiosn, setShowChatRoomOptions] = useState(false);
+  const [showRoomMembersComponent, setShowRoomMembersComponent] =
+    useState(false);
   const messageBoxContainerRef = useRef(null);
 
   useEffect(() => {
@@ -74,6 +78,7 @@ function Chat(props) {
           config
         );
         console.log("the advanced details are ", response.data);
+        setRoomMembers(response.data.room.roomMembers);
         setCreatorName(response.data.room.creatorName);
         setTimestamp(response.data.room.timestamp);
         const decrypted = await Promise.all(
@@ -231,16 +236,44 @@ function Chat(props) {
             </p>
           </div>
         </div>
-        <div className="group_header_right">
-          <Copy
-            className={dark ? "copy_icon dark_hover" : "copy_icon light_hover"}
-            onClick={handleCopyClick}
-          />
-          <Options
-            className={
-              dark ? "options_icon dark_hover" : "options_icon light_hover"
-            }
-          />
+        <div
+          className={
+            dark
+              ? "group_header_right dark_hover"
+              : "group_header_right light_hover"
+          }
+          onClick={() => setShowChatRoomOptions(!showChatRoomOptiosn)}
+        >
+          <Options className="options_icon" />
+          {showChatRoomOptiosn && (
+            <div
+              className={
+                dark
+                  ? "chat_room_options_list dark_primary-font"
+                  : "chat_room_options_list light_primary-font"
+              }
+            >
+              <p onClick={handleCopyClick}>Copy RoomID</p>
+              <span
+                style={{
+                  backgroundColor: dark ? "#ededed" : "#000000",
+                }}
+              ></span>
+              <p
+                onClick={() =>
+                  setShowRoomMembersComponent(!showRoomMembersComponent)
+                }
+              >
+                Room Members
+              </p>
+              <span
+                style={{
+                  backgroundColor: dark ? "#ededed" : "#000000",
+                }}
+              ></span>
+              <p>Leave Group</p>
+            </div>
+          )}
         </div>
         {copyMessage && (
           <p
@@ -256,6 +289,13 @@ function Chat(props) {
       </div>
 
       <div className="message_box" ref={messageBoxContainerRef}>
+        {showRoomMembersComponent && (
+          <RoomMembers
+            user={user}
+            roomMembers={roomMembers}
+            setShowRoomMembersComponent={setShowRoomMembersComponent}
+          />
+        )}
         {previousMessages.map(
           (data, index) =>
             data.message !== undefined &&
