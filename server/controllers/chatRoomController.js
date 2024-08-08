@@ -69,7 +69,10 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
     const user = req.user;
 
     const rooms = await ChatRoom.find({
-      "roomMembers.member": user._id,
+      $or: [
+        { "roomMembers.member": user._id },
+        { "pastRoomMembers.member": user._id },
+      ],
     }).populate("chats.sender", "name");
 
     if (!rooms.length) {
@@ -89,6 +92,10 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
           );
         }
 
+        const userLeft = room.pastRoomMembers.some((memberObj) =>
+          memberObj.member.equals(user._id)
+        );
+
         return {
           roomId: room.roomId,
           roomName: room.roomName,
@@ -100,6 +107,7 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
                 timestamp: lastChat.timestamp,
               }
             : null,
+          isRoomLeft: userLeft,
         };
       })
     );
@@ -126,6 +134,7 @@ async function decryptMessage(encryptedMessage, privateKey) {
 
 const getJoinedRoomsAdvancedDetails = async (req, res) => {
   const roomId = req.query.roomId;
+  const userId = req.user._id;
 
   try {
     const room = await ChatRoom.findOne({ roomId: roomId })
@@ -135,6 +144,10 @@ const getJoinedRoomsAdvancedDetails = async (req, res) => {
     if (!room) {
       return res.status(404).json({ message: "No joined rooms found" });
     }
+
+    const userLeft = room.pastRoomMembers.some((memberObj) =>
+      memberObj.member.equals(userId)
+    );
 
     const simplifiedRoom = {
       chats: room.chats.map((chat) => ({
@@ -160,6 +173,8 @@ const getJoinedRoomsAdvancedDetails = async (req, res) => {
       timestamp: room.timestamp,
       roomId: room.roomId,
       roomName: room.roomName,
+      groupProfilePic: room.groupProfilePic,
+      isRoomLeft: userLeft,
     };
 
     res.status(200).json({ room: simplifiedRoom });
@@ -207,6 +222,36 @@ const getChat = async (req, res) => {
   }
 };
 
+const leaveRoom = async (req, res) => {
+  const { roomId } = req.body;
+  const user = req.user;
+
+  try {
+    const room = await ChatRoom.findOne({
+      roomId,
+      "roomMembers.member": user._id,
+    });
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    room.pastRoomMembers.push({
+      member: user._id,
+      leftTimestamp: Date.now(),
+    });
+
+    room.roomMembers = room.roomMembers.filter(
+      (member) => member.member.toString() !== user._id.toString()
+    );
+
+    await room.save();
+
+    res.status(200).json({ message: "Left room successfully" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const deleteChats = async (req, res) => {
   try {
     await ChatRoom.deleteMany({});
@@ -223,5 +268,6 @@ module.exports = {
   getJoinedRoomsAdvancedDetails,
   uploadChat,
   getChat,
+  leaveRoom,
   deleteChats,
 };

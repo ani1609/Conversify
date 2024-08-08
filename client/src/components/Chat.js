@@ -26,6 +26,7 @@ function Chat(props) {
   const [showRoomMembersComponent, setShowRoomMembersComponent] =
     useState(false);
   const messageBoxContainerRef = useRef(null);
+  const [isRoomLeft, setIsRoomLeft] = useState(false);
 
   useEffect(() => {
     // Scroll to the bottom of the chat container when messages change
@@ -81,6 +82,7 @@ function Chat(props) {
         setRoomMembers(response.data.room.roomMembers);
         setCreatorName(response.data.room.creatorName);
         setTimestamp(response.data.room.timestamp);
+        setIsRoomLeft(response.data.room.isRoomLeft);
         const decrypted = await Promise.all(
           response.data.room.chats.map((chat) => decryptMessages(chat.message))
         );
@@ -94,8 +96,6 @@ function Chat(props) {
             (member) => member.armoredPublicKey
           )
         );
-        console.log("chats are ", chats);
-        console.log("encrypted chats are ", response.data.room.chats);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -198,6 +198,44 @@ function Chat(props) {
     setTimeout(() => setCopyMessage(false), 2000);
   };
 
+  const handleLeaveGroup = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/chat/leaveRoom",
+        {
+          roomId,
+        },
+        config
+      );
+      console.log(response.data);
+      // window.location.reload();
+    } catch (error) {
+      console.error("Error leaving group ", error);
+    }
+
+    socket.emit("leave_room", { roomId, user });
+  };
+
+  useEffect(() => {
+    socket.on("room_left", (data) => {
+      if (data.user.email === user.email) {
+        setIsRoomLeft(true);
+      }
+      setPublicKeys((publicKeys) =>
+        publicKeys.filter((key) => key !== data.user.armoredPublicKey)
+      );
+      setRoomMembers((roomMembers) =>
+        roomMembers.filter((member) => member.email !== data.user.email)
+      );
+      console.log(data.user.email, " left the room");
+    });
+  }, [socket, user]);
+
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div
@@ -271,7 +309,7 @@ function Chat(props) {
                   backgroundColor: dark ? "#ededed" : "#000000",
                 }}
               ></span>
-              <p>Leave Group</p>
+              <p onClick={handleLeaveGroup}>Leave Group</p>
             </div>
           )}
         </div>
@@ -292,6 +330,8 @@ function Chat(props) {
         {showRoomMembersComponent && (
           <RoomMembers
             user={user}
+            socket={socket}
+            roomId={roomId}
             roomMembers={roomMembers}
             setShowRoomMembersComponent={setShowRoomMembersComponent}
           />
@@ -406,20 +446,30 @@ function Chat(props) {
         )}
       </div>
 
-      <form className={dark ? "form_dark" : "form_light"}>
-        <input
-          type="text"
-          autoComplete="off"
-          value={plainText}
-          onChange={(e) => setPlainText(e.target.value)}
-          required
-          placeholder="Type a message"
-          autoFocus
-        />
-        <button type="submit" onClick={handleSendMessage}>
-          <Send className="send_icon" />
-        </button>
-      </form>
+      {!isRoomLeft ? (
+        <form className={dark ? "form_dark" : "form_light"}>
+          <input
+            type="text"
+            autoComplete="off"
+            value={plainText}
+            onChange={(e) => setPlainText(e.target.value)}
+            required
+            placeholder="Type a message"
+            autoFocus
+          />
+          <button type="submit" onClick={handleSendMessage}>
+            <Send className="send_icon" />
+          </button>
+        </form>
+      ) : (
+        <div
+          className={
+            dark ? "room_left_message_dark" : "room_left_message_light"
+          }
+        >
+          <p>You have left the room</p>
+        </div>
+      )}
     </div>
   );
 }

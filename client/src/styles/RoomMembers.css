@@ -85,8 +85,8 @@
 
 .dark_room_members_container img,
 .light_room_members_container img {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
 }
 
@@ -95,8 +95,8 @@
   fill: var(--primary);
   transition: 0.5s ease-in-out;
   border-radius: 50%;
-  height: 30px;
-  width: 30px;
+  height: 35px;
+  width: 35px;
   padding: 5px;
 }
 
@@ -108,18 +108,30 @@
   background-color: rgb(213, 213, 213);
 }
 
-.dark_room_members_container ul li p,
-.light_room_members_container ul li p {
-  margin: 0;
+.name_admin_container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: space-center;
   margin-left: 5px;
-  color: #d5d5d5;
+  gap: 2px;
 }
 
-.dark_room_members_container ul li div,
-.light_room_members_container ul li div {
-  margin-left: auto;
-  display: flex;
-  gap: 5px;
+.name_admin_container h1 {
+  margin: 0;
+  color: #d5d5d5;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.name_admin_container span {
+  font-size: 12px;
+}
+
+.name_admin_container p {
+  margin: 0;
+  color: #d5d5d5;
+  font-size: 12px;
 }
 
 .dark_room_members_container ul li div button,
@@ -140,4 +152,57 @@
   cursor: pointer;
   width: 24px;
   height: 24px;
+}
+
+.room_members_options {
+  margin-left: auto;
+  position: relative;
+}
+
+.dark_room_members_options_icon,
+.light_room_members_options_icon {
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+  transition: 0.5s ease-in-out;
+}
+
+.dark_room_members_options_icon {
+  fill: rgb(67, 67, 67);
+}
+
+.light_room_members_options_icon {
+  fill: rgb(213, 213, 213);
+}
+
+.room_members_options_list {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  top: 40px;
+  right: 0;
+  background-color: var(--primary);
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+  padding: 0;
+  margin: 0;
+}
+
+.room_members_options_list p {
+  margin: 0;
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  transition: 0.5s ease-in-out;
+  letter-spacing: 0.5px;
+  padding: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.room_members_options_list span {
+  height: 1px;
+  width: 98%;
+  margin: auto;
 }

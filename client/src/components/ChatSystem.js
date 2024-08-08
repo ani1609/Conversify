@@ -346,7 +346,18 @@ function ChatSystem(props) {
                         >
                           {room.roomName}
                         </p>
-                        {!room.lastMessage && (
+                        {room.isRoomLeft && (
+                          <p
+                            className={
+                              dark
+                                ? "tap_to_chat dark_secondary-font"
+                                : "tap_to_chat light_secondary-font"
+                            }
+                          >
+                            You left the room
+                          </p>
+                        )}
+                        {!room.lastMessage && !room.isRoomLeft && (
                           <p
                             className={
                               dark
@@ -358,6 +369,7 @@ function ChatSystem(props) {
                           </p>
                         )}
                         {room.lastMessage &&
+                          !room.isRoomLeft &&
                           room.lastMessage.message === undefined && (
                             <p
                               className={
@@ -370,6 +382,7 @@ function ChatSystem(props) {
                             </p>
                           )}
                         {room.lastMessage &&
+                          !room.isRoomLeft &&
                           room.lastMessage.message !== undefined && (
                             <p
                               className={

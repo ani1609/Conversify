@@ -382,3 +382,31 @@
     transform: scale(1) translateX(0%);
   }
 }
+
+.room_left_message_dark,
+.room_left_message_light {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.room_left_message_dark {
+  background-color: rgb(128, 128, 128);
+  color: var(--dark_primary-font);
+}
+
+.room_left_message_light {
+  background-color: rgb(241, 241, 241);
+  color: var(--light_primary-font);
+}
+
+.room_left_message_dark p,
+.room_left_message_light p {
+  margin: 0;
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  transition: 0.5s ease-in-out;
+  letter-spacing: 0.5px;
+}

@@ -14,6 +14,7 @@ const {
   getJoinedRoomsBasicDetails,
   getJoinedRoomsAdvancedDetails,
   uploadChat,
+  leaveRoom,
   deleteChats,
 } = require("./controllers/chatRoomController");
 const {
@@ -54,6 +55,7 @@ app.get("/api/user", authenticateJWT, (req, res) => {
 app.post("/api/chat/createRoom", authenticateJWT, createRoom);
 app.post("/api/chat/joinRoom", authenticateJWT, joinRoom);
 app.post("/api/chat/uploadChat", authenticateJWT, uploadChat);
+app.post("/api/chat/leaveRoom", authenticateJWT, leaveRoom);
 app.get(
   "/api/user/getJoinedRoomsBasicDetails",
   authenticateJWT,
@@ -135,6 +137,23 @@ io.on("connection", (socket) => {
   socket.on("send_message", (data) => {
     console.log("emmiting message");
     io.to(data.roomId).emit("receive_message", { data: data });
+  });
+
+  // Handle leave room
+  socket.on("leave_room", (data) => {
+    const roomIndex = joinedRooms.indexOf(data.roomId);
+    if (roomIndex !== -1) {
+      // Notify all users, including the one who is leaving
+      io.to(data.roomId).emit("room_left", {
+        user: data.user,
+        message: `${data.user.name} has left the room.`,
+      });
+
+      // Leave the room
+      socket.leave(data.roomId);
+      joinedRooms.splice(roomIndex, 1);
+      console.log(`User left room: ${data.roomId}`);
+    }
   });
 
   socket.on("disconnect", () => {
