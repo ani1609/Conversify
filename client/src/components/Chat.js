@@ -35,20 +35,6 @@ function Chat(props) {
       messageBoxContainerRef.current.scrollHeight;
   }, [previousMessages, messages]);
 
-  useEffect(() => {
-    socket.on("join_room", (data) => {
-      console.log(data.user.name, " joined the chat");
-      setPublicKeys((publicKeys) => [
-        ...publicKeys,
-        data.user.armoredPublicKey,
-      ]);
-    });
-  }, [socket]);
-
-  useEffect(() => {
-    setMessages([]);
-  }, [roomId]);
-
   const decryptMessages = useCallback(
     async (message) => {
       try {
@@ -65,6 +51,120 @@ function Chat(props) {
     },
     [user.encryptedPrivateKey]
   );
+
+  useEffect(() => {
+    socket.on("join_room", (data) => {
+      console.log(data.user.name, " joined the chat");
+
+      // check if the user is already in the room and add with a timestamp if not present previously
+      const userInRoom = roomMembers.some(
+        (member) => member.email === data.user.email
+      );
+
+      if (!userInRoom) {
+        setPublicKeys((publicKeys) => [
+          ...publicKeys,
+          data.user.armoredPublicKey,
+        ]);
+
+        setRoomMembers((roomMembers) => {
+          const updatedRoomMembers = [
+            ...roomMembers,
+            {
+              email: data.user.email,
+              name: data.user.name,
+              profilePic: data.user.profilePic,
+              armoredPublicKey: data.user.armoredPublicKey,
+              isAdmin: false,
+              joinTimestamp: Date.now(),
+            },
+          ];
+
+          // Remove any duplicates
+          return updatedRoomMembers.filter(
+            (member, index, self) =>
+              index ===
+              self.findIndex(
+                (t) => t.email === member.email && t.name === member.name
+              )
+          );
+        });
+      }
+    });
+
+    socket.on("receive_message", async (data) => {
+      console.log("received message", data);
+      const decrypted = await decryptMessages(data.data.message);
+      data.data.message = decrypted;
+      setMessages((messages) => [...messages, data.data]);
+    });
+
+    socket.on("room_left", (data) => {
+      if (data.user.email === user.email) {
+        setIsRoomLeft(true);
+      }
+      setPublicKeys((publicKeys) =>
+        publicKeys.filter((key) => key !== data.user.armoredPublicKey)
+      );
+      setRoomMembers((roomMembers) =>
+        roomMembers.filter((member) => member.email !== data.user.email)
+      );
+      console.log(data.user.email, " left the room");
+    });
+
+    socket.on("member_removed", (data) => {
+      const { removedUser, removerUser } = data;
+
+      console.log("member removed", removedUser.email);
+
+      setPublicKeys((publicKeys) =>
+        publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
+      );
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.filter((member) => member.email !== removedUser.email)
+      );
+
+      if (removedUser.email === user.email) {
+        setIsMemberRemovedData({
+          isRemoved: true,
+          removerName: removerUser.name,
+        });
+      }
+    });
+
+    socket.on("member_made_admin", (data) => {
+      const { userToMakeAdmin } = data;
+
+      console.log("member made admin", userToMakeAdmin.email);
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.map((member) =>
+          member.email === userToMakeAdmin.email
+            ? { ...member, isAdmin: true }
+            : member
+        )
+      );
+    });
+
+    socket.on("member_dismissed_as_admin", (data) => {
+      const { userToDismissAsAdmin } = data;
+
+      console.log("dismissed as admin", userToDismissAsAdmin.email);
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.map((member) =>
+          member.email === userToDismissAsAdmin.email
+            ? { ...member, isAdmin: false }
+            : member
+        )
+      );
+    });
+  }, [socket, user, decryptMessages, roomMembers]);
+
+  useEffect(() => {
+    setMessages([]);
+  }, [roomId]);
 
   const getJoinedRoomsAdvancedDetails = useCallback(
     async (roomId) => {
@@ -113,15 +213,6 @@ function Chat(props) {
       getJoinedRoomsAdvancedDetails(roomId);
     }
   }, [roomId, getJoinedRoomsAdvancedDetails]);
-
-  useEffect(() => {
-    socket.on("receive_message", async (data) => {
-      console.log("received message", data);
-      const decrypted = await decryptMessages(data.data.message);
-      data.data.message = decrypted;
-      setMessages((messages) => [...messages, data.data]);
-    });
-  }, [socket, decryptMessages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -226,76 +317,6 @@ function Chat(props) {
     socket.emit("leave_room", { roomId, user });
   };
 
-  useEffect(() => {
-    socket.on("room_left", (data) => {
-      if (data.user.email === user.email) {
-        setIsRoomLeft(true);
-      }
-      setPublicKeys((publicKeys) =>
-        publicKeys.filter((key) => key !== data.user.armoredPublicKey)
-      );
-      setRoomMembers((roomMembers) =>
-        roomMembers.filter((member) => member.email !== data.user.email)
-      );
-      console.log(data.user.email, " left the room");
-    });
-  }, [socket, user]);
-
-  useEffect(() => {
-    socket.on("member_removed", (data) => {
-      const { removedUser, removerUser } = data;
-
-      console.log("member removed", removedUser.email);
-
-      setPublicKeys((publicKeys) =>
-        publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
-      );
-
-      setRoomMembers((roomMembers) =>
-        roomMembers.filter((member) => member.email !== removedUser.email)
-      );
-
-      if (removedUser.email === user.email) {
-        setIsMemberRemovedData({
-          isRemoved: true,
-          removerName: removerUser.name,
-        });
-      }
-    });
-  }, [socket, user]);
-
-  useEffect(() => {
-    socket.on("member_made_admin", (data) => {
-      const { userToMakeAdmin } = data;
-
-      console.log("member made admin", userToMakeAdmin.email);
-
-      setRoomMembers((roomMembers) =>
-        roomMembers.map((member) =>
-          member.email === userToMakeAdmin.email
-            ? { ...member, isAdmin: true }
-            : member
-        )
-      );
-    });
-  }, [socket]);
-
-  useEffect(() => {
-    socket.on("member_dismissed_as_admin", (data) => {
-      const { userToDismissAsAdmin } = data;
-
-      console.log("dismissed as admin", userToDismissAsAdmin.email);
-
-      setRoomMembers((roomMembers) =>
-        roomMembers.map((member) =>
-          member.email === userToDismissAsAdmin.email
-            ? { ...member, isAdmin: false }
-            : member
-        )
-      );
-    });
-  }, [socket]);
-
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div
@@ -390,7 +411,10 @@ function Chat(props) {
         )}
       </div>
 
-      <div className="message_box" ref={messageBoxContainerRef}>
+      <div
+        className="message_box custom_scroll_bar"
+        ref={messageBoxContainerRef}
+      >
         {showRoomMembersComponent && (
           <RoomMembers
             user={user}

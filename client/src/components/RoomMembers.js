@@ -63,7 +63,6 @@ function RoomMembers(props) {
   };
 
   const handleMakeAdmin = async (userToMakeAdmin) => {
-    //write only the socket logic here
     socket.emit("make_admin", {
       roomId,
       userToMakeAdmin,
@@ -92,7 +91,6 @@ function RoomMembers(props) {
   };
 
   const handleDismissAsAdmin = async (userToDismissAsAdmin) => {
-    //write only the socket logic here
     socket.emit("dismiss_as_admin", {
       roomId,
       userToDismissAsAdmin,

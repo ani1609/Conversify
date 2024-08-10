@@ -159,7 +159,8 @@
   box-sizing: border-box;
   padding: 5px;
   height: calc(100vh - 190px);
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: clip;
 }
 
 .self_message_container,
