@@ -27,6 +27,7 @@ function Chat(props) {
     useState(false);
   const messageBoxContainerRef = useRef(null);
   const [isRoomLeft, setIsRoomLeft] = useState(false);
+  const [isMemberRemovedData, setIsMemberRemovedData] = useState({});
 
   useEffect(() => {
     // Scroll to the bottom of the chat container when messages change
@@ -83,6 +84,10 @@ function Chat(props) {
         setCreatorName(response.data.room.creatorName);
         setTimestamp(response.data.room.timestamp);
         setIsRoomLeft(response.data.room.isRoomLeft);
+        setIsMemberRemovedData({
+          isRemoved: response.data.room.isRemovedFromRoom,
+          removerName: response.data.room.removerName,
+        });
         const decrypted = await Promise.all(
           response.data.room.chats.map((chat) => decryptMessages(chat.message))
         );
@@ -236,6 +241,29 @@ function Chat(props) {
     });
   }, [socket, user]);
 
+  useEffect(() => {
+    socket.on("member_removed", (data) => {
+      const { removedUser, removerUser } = data;
+
+      console.log("member removed", removedUser.email);
+
+      setPublicKeys((publicKeys) =>
+        publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
+      );
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.filter((member) => member.email !== removedUser.email)
+      );
+
+      if (removedUser.email === user.email) {
+        setIsMemberRemovedData({
+          isRemoved: true,
+          removerName: removerUser.name,
+        });
+      }
+    });
+  }, [socket, user]);
+
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div
@@ -332,7 +360,9 @@ function Chat(props) {
             user={user}
             socket={socket}
             roomId={roomId}
+            setIsRoomLeft={setIsRoomLeft}
             roomMembers={roomMembers}
+            setPublicKeys={setPublicKeys}
             setShowRoomMembersComponent={setShowRoomMembersComponent}
           />
         )}
@@ -446,7 +476,19 @@ function Chat(props) {
         )}
       </div>
 
-      {!isRoomLeft ? (
+      {isMemberRemovedData.isRemoved && (
+        <div
+          className={
+            dark
+              ? "member_removed_message_dark"
+              : "member_removed_message_light"
+          }
+        >
+          <p>{isMemberRemovedData.removerName} removed you from the room</p>
+        </div>
+      )}
+
+      {!isRoomLeft && !isMemberRemovedData.isRemoved ? (
         <form className={dark ? "form_dark" : "form_light"}>
           <input
             type="text"

@@ -22,27 +22,33 @@ function RoomMembers(props) {
     });
   };
 
-  const handleRemoveMember = async (email) => {
-    socket.emit("removeMember", { roomId, email });
+  const handleRemoveMember = async (userToRemove) => {
+    try {
+      socket.emit("remove_member", {
+        roomId,
+        removedUser: userToRemove,
+        removerUser: user,
+      });
 
-    // try {
-    //   const config = {
-    //     headers: {
-    //       Authorization: `Bearer ${userToken}`,
-    //     },
-    //   };
-    //   const response = await axios.post(
-    //     "http://localhost:4000/api/chat/removeMember",
-    //     {
-    //       roomId,
-    //       email,
-    //     },
-    //     config
-    //   );
-    //   console.log(response.data);
-    // } catch (error) {
-    //   console.error("Error removing member ", error);
-    // }
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+
+      const response = await axios.post(
+        "http://localhost:4000/api/chat/removeMember",
+        {
+          roomId,
+          userToRemove,
+        },
+        config
+      );
+      console.log(response.data.message);
+      setOpenOptions({});
+    } catch (error) {
+      console.error("Error removing member:", error);
+    }
   };
 
   const isUserAdmin = roomMembers.some(
@@ -111,7 +117,7 @@ function RoomMembers(props) {
                             : "room_members_options_list light_primary-font"
                         }
                       >
-                        <p>Remove</p>
+                        <p onClick={() => handleRemoveMember(member)}>Remove</p>
                         <span
                           style={{
                             backgroundColor: dark ? "#ededed" : "#000000",

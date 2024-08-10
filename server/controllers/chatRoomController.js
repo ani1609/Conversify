@@ -46,9 +46,23 @@ const joinRoom = async (req, res) => {
       return res.status(404).json({ message: "Room not found" });
     }
 
-    const isMember = room.roomMembers.some(
-      (member) => member.userEmail === user.email
+    const isMember = room.roomMembers.some((member) =>
+      member.member.equals(user._id)
     );
+
+    //check if the user is in the previous members list
+
+    const isPastMember = room.pastRoomMembers.some((member) =>
+      member.member.equals(user._id)
+    );
+
+    if (isPastMember) {
+      //remove the user from the past members list and add to the current members list
+      room.pastRoomMembers = room.pastRoomMembers.filter(
+        (member) => !member.member.equals(user._id)
+      );
+    }
+
     if (!isMember) {
       room.roomMembers.push({
         member: user._id,
@@ -73,7 +87,9 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
         { "roomMembers.member": user._id },
         { "pastRoomMembers.member": user._id },
       ],
-    }).populate("chats.sender", "name");
+    })
+      .populate("chats.sender", "name")
+      .populate("pastRoomMembers.removedBy", "name");
 
     if (!rooms.length) {
       return res.status(404).json({ message: "No joined rooms found" });
@@ -92,9 +108,17 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
           );
         }
 
-        const userLeft = room.pastRoomMembers.some((memberObj) =>
-          memberObj.member.equals(user._id)
+        const isLeft = room.pastRoomMembers.some(
+          (memberObj) =>
+            memberObj.member.equals(user._id) && !memberObj.removedBy
         );
+
+        const removedMember = room.pastRoomMembers.find(
+          (memberObj) =>
+            memberObj.member.equals(user._id) && memberObj.removedBy
+        );
+
+        const isRemoved = !!removedMember;
 
         return {
           roomId: room.roomId,
@@ -107,7 +131,9 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
                 timestamp: lastChat.timestamp,
               }
             : null,
-          isRoomLeft: userLeft,
+          isRoomLeft: isLeft,
+          isRemovedFromRoom: isRemoved,
+          removerName: isRemoved ? removedMember.removedBy.name : null,
         };
       })
     );
@@ -134,22 +160,29 @@ async function decryptMessage(encryptedMessage, privateKey) {
 
 const getJoinedRoomsAdvancedDetails = async (req, res) => {
   const roomId = req.query.roomId;
-  const userId = req.user._id;
+  const user = req.user;
 
   try {
     const room = await ChatRoom.findOne({ roomId: roomId })
       .populate("creator", "name email profilePic")
       .populate("roomMembers.member", "name email profilePic armoredPublicKey")
-      .populate("chats.sender", "name email profilePic");
+      .populate("chats.sender", "name email profilePic")
+      .populate("pastRoomMembers.removedBy", "name");
     if (!room) {
       return res.status(404).json({ message: "No joined rooms found" });
     }
 
-    const userLeft = room.pastRoomMembers.some((memberObj) =>
-      memberObj.member.equals(userId)
+    const isLeft = room.pastRoomMembers.some(
+      (memberObj) => memberObj.member.equals(user._id) && !memberObj.removedBy
     );
 
-    const simplifiedRoom = {
+    const removedMember = room.pastRoomMembers.find(
+      (memberObj) => memberObj.member.equals(user._id) && memberObj.removedBy
+    );
+
+    const isRemoved = !!removedMember;
+
+    const advancedRoom = {
       chats: room.chats.map((chat) => ({
         senderName: chat.sender.name,
         senderEmail: chat.sender.email,
@@ -174,10 +207,12 @@ const getJoinedRoomsAdvancedDetails = async (req, res) => {
       roomId: room.roomId,
       roomName: room.roomName,
       groupProfilePic: room.groupProfilePic,
-      isRoomLeft: userLeft,
+      isRoomLeft: isLeft,
+      isRemovedFromRoom: isRemoved,
+      removerName: isRemoved ? removedMember.removedBy.name : null,
     };
 
-    res.status(200).json({ room: simplifiedRoom });
+    res.status(200).json({ room: advancedRoom });
   } catch (error) {
     console.error("Error fetching room details:", error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -252,6 +287,46 @@ const leaveRoom = async (req, res) => {
   }
 };
 
+const removeMember = async (req, res) => {
+  const { roomId, userToRemove } = req.body;
+  const user = req.user;
+
+  try {
+    const room = await ChatRoom.findOne({ roomId }).populate(
+      "roomMembers.member"
+    );
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const memberToRemove = room.roomMembers.find(
+      (member) => member.member.email === userToRemove.email
+    );
+
+    if (!memberToRemove) {
+      return res.status(404).json({ message: "Member not found in the room" });
+    }
+
+    room.roomMembers = room.roomMembers.filter(
+      (member) => member.member.email !== userToRemove.email
+    );
+
+    room.pastRoomMembers.push({
+      member: memberToRemove.member._id,
+      leftTimestamp: new Date(),
+      removedBy: user._id,
+    });
+
+    await room.save();
+
+    res.status(200).json({ message: "Member removed successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const deleteChats = async (req, res) => {
   try {
     await ChatRoom.deleteMany({});
@@ -269,5 +344,6 @@ module.exports = {
   uploadChat,
   getChat,
   leaveRoom,
+  removeMember,
   deleteChats,
 };

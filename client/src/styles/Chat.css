@@ -384,25 +384,31 @@
 }
 
 .room_left_message_dark,
-.room_left_message_light {
+.room_left_message_light,
+.member_removed_message_dark,
+.member_removed_message_light {
   height: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.room_left_message_dark {
+.room_left_message_dark,
+.member_removed_message_dark {
   background-color: rgb(128, 128, 128);
   color: var(--dark_primary-font);
 }
 
-.room_left_message_light {
+.room_left_message_light,
+.member_removed_message_light {
   background-color: rgb(241, 241, 241);
   color: var(--light_primary-font);
 }
 
 .room_left_message_dark p,
-.room_left_message_light p {
+.room_left_message_light p,
+.member_removed_message_dark p,
+.member_removed_message_light p {
   margin: 0;
   font-size: 14px;
   font-family: "Montserrat", sans-serif;

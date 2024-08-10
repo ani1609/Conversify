@@ -50,6 +50,10 @@ const chatRoomSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      removedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     },
   ],
   chats: [
