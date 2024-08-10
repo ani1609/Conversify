@@ -4,11 +4,11 @@ import "../index.css";
 import "../styles/Chat.css";
 import * as openpgp from "openpgp/lightweight";
 import { ReactComponent as Group } from "../icons/group.svg";
-import { ReactComponent as Copy } from "../icons/copy.svg";
 import { ReactComponent as Options } from "../icons/options.svg";
 import { ReactComponent as Profile } from "../icons/profile.svg";
 import { ReactComponent as Send } from "../icons/send.svg";
 import { useTheme } from "./ThemeContext";
+import RoomMembers from "./RoomMembers";
 
 function Chat(props) {
   const { user, socket, roomId, roomName, groupProfilePic } = props;
@@ -17,11 +17,17 @@ function Chat(props) {
   const [previousMessages, setPreviousMessages] = useState([]);
   const [creatorName, setCreatorName] = useState("");
   const [timestamp, setTimestamp] = useState(Date.now());
+  const [roomMembers, setRoomMembers] = useState([]);
   const [publicKeys, setPublicKeys] = useState([]);
   const [messages, setMessages] = useState([]);
   const [copyMessage, setCopyMessage] = useState(false);
   const { dark } = useTheme();
+  const [showChatRoomOptiosn, setShowChatRoomOptions] = useState(false);
+  const [showRoomMembersComponent, setShowRoomMembersComponent] =
+    useState(false);
   const messageBoxContainerRef = useRef(null);
+  const [isRoomLeft, setIsRoomLeft] = useState(false);
+  const [isMemberRemovedData, setIsMemberRemovedData] = useState({});
 
   useEffect(() => {
     // Scroll to the bottom of the chat container when messages change
@@ -54,7 +60,7 @@ function Chat(props) {
         });
         return decrypted;
       } catch (error) {
-        // console.error("Error in decrypting message ",error);
+        console.error("Error in decrypting message ", error);
       }
     },
     [user.encryptedPrivateKey]
@@ -73,24 +79,28 @@ function Chat(props) {
           `http://localhost:4000/api/chat/getJoinedRoomsAdvancedDetails?roomId=${roomId}`,
           config
         );
-        console.log(response.data);
-        setCreatorName(response.data.rooms.creatorName);
-        setTimestamp(response.data.rooms.timestamp);
+        console.log("the advanced details are ", response.data);
+        setRoomMembers(response.data.room.roomMembers);
+        setCreatorName(response.data.room.creatorName);
+        setTimestamp(response.data.room.timestamp);
+        setIsRoomLeft(response.data.room.isRoomLeft);
+        setIsMemberRemovedData({
+          isRemoved: response.data.room.isRemovedFromRoom,
+          removerName: response.data.room.removerName,
+        });
         const decrypted = await Promise.all(
-          response.data.rooms.chats.map((chat) => decryptMessages(chat.message))
+          response.data.room.chats.map((chat) => decryptMessages(chat.message))
         );
-        const chats = response.data.rooms.chats.map((chat, index) => {
+        const chats = response.data.room.chats.map((chat, index) => {
           chat.message = decrypted[index];
           return chat;
         });
         setPreviousMessages(chats);
         setPublicKeys(
-          response.data.rooms.roomMembers.map(
+          response.data.room.roomMembers.map(
             (member) => member.armoredPublicKey
           )
         );
-        console.log("chats are ", chats);
-        console.log("encrypted chats are ", response.data.rooms.chats);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -116,6 +126,7 @@ function Chat(props) {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     let encrypted;
+    console.log("the public keys are ", publicKeys);
     if (plainText && user && user.name && publicKeys) {
       const unArmoredPublicKeys = await Promise.all(
         publicKeys.map((armoredKey) =>
@@ -192,6 +203,99 @@ function Chat(props) {
     setTimeout(() => setCopyMessage(false), 2000);
   };
 
+  const handleLeaveGroup = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/chat/leaveRoom",
+        {
+          roomId,
+        },
+        config
+      );
+      console.log(response.data);
+      // window.location.reload();
+    } catch (error) {
+      console.error("Error leaving group ", error);
+    }
+
+    socket.emit("leave_room", { roomId, user });
+  };
+
+  useEffect(() => {
+    socket.on("room_left", (data) => {
+      if (data.user.email === user.email) {
+        setIsRoomLeft(true);
+      }
+      setPublicKeys((publicKeys) =>
+        publicKeys.filter((key) => key !== data.user.armoredPublicKey)
+      );
+      setRoomMembers((roomMembers) =>
+        roomMembers.filter((member) => member.email !== data.user.email)
+      );
+      console.log(data.user.email, " left the room");
+    });
+  }, [socket, user]);
+
+  useEffect(() => {
+    socket.on("member_removed", (data) => {
+      const { removedUser, removerUser } = data;
+
+      console.log("member removed", removedUser.email);
+
+      setPublicKeys((publicKeys) =>
+        publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
+      );
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.filter((member) => member.email !== removedUser.email)
+      );
+
+      if (removedUser.email === user.email) {
+        setIsMemberRemovedData({
+          isRemoved: true,
+          removerName: removerUser.name,
+        });
+      }
+    });
+  }, [socket, user]);
+
+  useEffect(() => {
+    socket.on("member_made_admin", (data) => {
+      const { userToMakeAdmin } = data;
+
+      console.log("member made admin", userToMakeAdmin.email);
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.map((member) =>
+          member.email === userToMakeAdmin.email
+            ? { ...member, isAdmin: true }
+            : member
+        )
+      );
+    });
+  }, [socket]);
+
+  useEffect(() => {
+    socket.on("member_dismissed_as_admin", (data) => {
+      const { userToDismissAsAdmin } = data;
+
+      console.log("dismissed as admin", userToDismissAsAdmin.email);
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.map((member) =>
+          member.email === userToDismissAsAdmin.email
+            ? { ...member, isAdmin: false }
+            : member
+        )
+      );
+    });
+  }, [socket]);
+
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div
@@ -230,16 +334,44 @@ function Chat(props) {
             </p>
           </div>
         </div>
-        <div className="group_header_right">
-          <Copy
-            className={dark ? "copy_icon dark_hover" : "copy_icon light_hover"}
-            onClick={handleCopyClick}
-          />
-          <Options
-            className={
-              dark ? "options_icon dark_hover" : "options_icon light_hover"
-            }
-          />
+        <div
+          className={
+            dark
+              ? "group_header_right dark_hover"
+              : "group_header_right light_hover"
+          }
+          onClick={() => setShowChatRoomOptions(!showChatRoomOptiosn)}
+        >
+          <Options className="options_icon" />
+          {showChatRoomOptiosn && (
+            <div
+              className={
+                dark
+                  ? "chat_room_options_list dark_primary-font"
+                  : "chat_room_options_list light_primary-font"
+              }
+            >
+              <p onClick={handleCopyClick}>Copy RoomID</p>
+              <span
+                style={{
+                  backgroundColor: dark ? "#ededed" : "#000000",
+                }}
+              ></span>
+              <p
+                onClick={() =>
+                  setShowRoomMembersComponent(!showRoomMembersComponent)
+                }
+              >
+                Room Members
+              </p>
+              <span
+                style={{
+                  backgroundColor: dark ? "#ededed" : "#000000",
+                }}
+              ></span>
+              <p onClick={handleLeaveGroup}>Leave Group</p>
+            </div>
+          )}
         </div>
         {copyMessage && (
           <p
@@ -255,6 +387,17 @@ function Chat(props) {
       </div>
 
       <div className="message_box" ref={messageBoxContainerRef}>
+        {showRoomMembersComponent && (
+          <RoomMembers
+            user={user}
+            socket={socket}
+            roomId={roomId}
+            setIsRoomLeft={setIsRoomLeft}
+            roomMembers={roomMembers}
+            setPublicKeys={setPublicKeys}
+            setShowRoomMembersComponent={setShowRoomMembersComponent}
+          />
+        )}
         {previousMessages.map(
           (data, index) =>
             data.message !== undefined &&
@@ -365,20 +508,42 @@ function Chat(props) {
         )}
       </div>
 
-      <form className={dark ? "form_dark" : "form_light"}>
-        <input
-          type="text"
-          autoComplete="off"
-          value={plainText}
-          onChange={(e) => setPlainText(e.target.value)}
-          required
-          placeholder="Type a message"
-          autoFocus
-        />
-        <button type="submit" onClick={handleSendMessage}>
-          <Send className="send_icon" />
-        </button>
-      </form>
+      {isMemberRemovedData.isRemoved && (
+        <div
+          className={
+            dark
+              ? "member_removed_message_dark"
+              : "member_removed_message_light"
+          }
+        >
+          <p>{isMemberRemovedData.removerName} removed you from the room</p>
+        </div>
+      )}
+
+      {!isRoomLeft && !isMemberRemovedData.isRemoved ? (
+        <form className={dark ? "form_dark" : "form_light"}>
+          <input
+            type="text"
+            autoComplete="off"
+            value={plainText}
+            onChange={(e) => setPlainText(e.target.value)}
+            required
+            placeholder="Type a message"
+            autoFocus
+          />
+          <button type="submit" onClick={handleSendMessage}>
+            <Send className="send_icon" />
+          </button>
+        </form>
+      ) : (
+        <div
+          className={
+            dark ? "room_left_message_dark" : "room_left_message_light"
+          }
+        >
+          <p>You have left the room</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,8 +4,6 @@ const authenticateJWT = require("./middlewares/authenticateJWT");
 const {
   login,
   signup,
-  uploadRoomId,
-  getRoomId,
   editUserInfo,
   changePassword,
   deleteUsers,
@@ -16,7 +14,10 @@ const {
   getJoinedRoomsBasicDetails,
   getJoinedRoomsAdvancedDetails,
   uploadChat,
-  getChat,
+  leaveRoom,
+  removeMember,
+  makeAdmin,
+  dissmisAsAdmin,
   deleteChats,
 } = require("./controllers/chatRoomController");
 const {
@@ -57,7 +58,10 @@ app.get("/api/user", authenticateJWT, (req, res) => {
 app.post("/api/chat/createRoom", authenticateJWT, createRoom);
 app.post("/api/chat/joinRoom", authenticateJWT, joinRoom);
 app.post("/api/chat/uploadChat", authenticateJWT, uploadChat);
-app.post("/api/chat/getChat", authenticateJWT, getChat);
+app.post("/api/chat/leaveRoom", authenticateJWT, leaveRoom);
+app.post("/api/chat/removeMember", authenticateJWT, removeMember);
+app.post("/api/chat/makeAdmin", authenticateJWT, makeAdmin);
+app.post("/api/chat/dismissAsAdmin", authenticateJWT, dissmisAsAdmin);
 app.get(
   "/api/user/getJoinedRoomsBasicDetails",
   authenticateJWT,
@@ -122,6 +126,9 @@ io.on("connection", (socket) => {
 
   // Handle new user joining room
   socket.on("join_room", (data) => {
+    // Attach user data to the socket
+    socket.user = data.user;
+
     // Leave all previously joined rooms
     for (const room of joinedRooms) {
       socket.leave(room);
@@ -139,6 +146,86 @@ io.on("connection", (socket) => {
   socket.on("send_message", (data) => {
     console.log("emmiting message");
     io.to(data.roomId).emit("receive_message", { data: data });
+  });
+
+  // Handle leave room
+  socket.on("leave_room", (data) => {
+    const roomIndex = joinedRooms.indexOf(data.roomId);
+    if (roomIndex !== -1) {
+      // Notify all users, including the one who is leaving
+      io.to(data.roomId).emit("room_left", {
+        user: data.user,
+        message: `${data.user.name} has left the room.`,
+      });
+
+      // Leave the room
+      socket.leave(data.roomId);
+      joinedRooms.splice(roomIndex, 1);
+      console.log(`User left room: ${data.roomId}`);
+    }
+  });
+
+  // Handle remove member
+  socket.on("remove_member", (data) => {
+    const { roomId, removedUser, removerUser } = data;
+
+    // Find the socket of the user to be removed
+    const socketsInRoom = io.sockets.adapter.rooms.get(roomId) || new Set();
+
+    let kickFlag = false;
+
+    for (const socketId of socketsInRoom) {
+      const clientSocket = io.sockets.sockets.get(socketId);
+      // Check if the clientSocket has the user data
+      if (clientSocket.user?.email === removedUser.email) {
+        console.log(
+          `${removerUser.name} removed ${removedUser.name} from room: ${roomId}`
+        );
+
+        console.log("user removed", removedUser);
+
+        // Notify all clients in the room that the member has been removed
+        io.to(roomId).emit("member_removed", {
+          removedUser,
+          removerUser,
+        });
+
+        kickFlag = true;
+
+        clientSocket.leave(roomId);
+
+        // Disconnect the user from the socket
+        clientSocket.disconnect(true);
+
+        break;
+      }
+    }
+
+    // notifyying others even if the kicked user is not in the room (offline or something)
+    if (kickFlag) {
+      io.to(roomId).emit("member_removed", {
+        removedUser,
+        removerUser,
+      });
+    }
+  });
+
+  //Handle make admin
+  socket.on("make_admin", (data) => {
+    const { roomId, userToMakeAdmin } = data;
+
+    io.to(roomId).emit("member_made_admin", {
+      userToMakeAdmin,
+    });
+  });
+
+  //Handle dismiss as admin
+  socket.on("dismiss_as_admin", (data) => {
+    const { roomId, userToDismissAsAdmin } = data;
+
+    io.to(roomId).emit("member_dismissed_as_admin", {
+      userToDismissAsAdmin,
+    });
   });
 
   socket.on("disconnect", () => {

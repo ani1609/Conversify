@@ -6,8 +6,6 @@ const { SECRET_KEY } = process.env;
 function authenticateJWT(req, res, next) {
   const authorizationHeader = req.header("Authorization");
 
-  console.log("the token is ", authorizationHeader);
-
   if (!authorizationHeader) {
     return res
       .status(401)
@@ -15,8 +13,6 @@ function authenticateJWT(req, res, next) {
   }
 
   const token = authorizationHeader.split(" ")[1];
-
-  console.log(token);
 
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {

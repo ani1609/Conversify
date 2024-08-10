@@ -1,0 +1,208 @@
+.room_members_parent {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  backdrop-filter: blur(5px);
+  z-index: 10;
+  animation-name: fadeIn;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.room_members_parent::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(24, 24, 24, 0.5);
+  z-index: -1;
+}
+
+.dark_room_members_container,
+.light_room_members_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  padding: 30px 50px;
+  border-radius: 5px;
+  transition: 0.5s ease-in-out;
+  position: relative;
+}
+
+.dark_room_members_container {
+  background-color: rgba(0, 0, 0, 0.823);
+}
+
+.light_room_members_container {
+  background-color: rgba(65, 65, 65, 0.833);
+}
+
+.dark_room_members_container h1,
+.light_room_members_container h1 {
+  color: var(--primary);
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-size: 35px;
+  margin: 0;
+}
+
+.dark_room_members_container ul,
+.light_room_members_container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background-color: var(--primary);
+  min-width: 300px;
+  border-radius: 5px;
+}
+
+.dark_room_members_container ul li,
+.light_room_members_container ul li {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+}
+
+.dark_room_members_container img,
+.light_room_members_container img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+.dark_room_members_profile_icon,
+.light_room_members_profile_icon {
+  fill: var(--primary);
+  transition: 0.5s ease-in-out;
+  border-radius: 50%;
+  height: 35px;
+  width: 35px;
+  padding: 5px;
+}
+
+.dark_room_members_profile_icon {
+  background-color: rgb(67, 67, 67);
+}
+
+.light_room_members_profile_icon {
+  background-color: rgb(213, 213, 213);
+}
+
+.name_admin_container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: space-center;
+  margin-left: 5px;
+  gap: 2px;
+}
+
+.name_admin_container h1 {
+  margin: 0;
+  color: #d5d5d5;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.name_admin_container span {
+  font-size: 12px;
+}
+
+.name_admin_container p {
+  margin: 0;
+  color: #d5d5d5;
+  font-size: 12px;
+}
+
+.dark_room_members_container ul li div button,
+.light_room_members_container ul li div button {
+  color: #d5d5d5;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background-color: transparent;
+  padding: 5px;
+  font-size: 13px;
+}
+
+.room_close_icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+}
+
+.room_members_options {
+  margin-left: auto;
+  position: relative;
+}
+
+.dark_room_members_options_icon,
+.light_room_members_options_icon {
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+  transition: 0.5s ease-in-out;
+}
+
+.dark_room_members_options_icon {
+  fill: rgb(67, 67, 67);
+}
+
+.light_room_members_options_icon {
+  fill: rgb(213, 213, 213);
+}
+
+.room_members_options_list {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  top: 40px;
+  right: 0;
+  background-color: var(--primary);
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+  padding: 0;
+  margin: 0;
+}
+
+.room_members_options_list p {
+  margin: 0;
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  transition: 0.5s ease-in-out;
+  letter-spacing: 0.5px;
+  padding: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.room_members_options_list span {
+  height: 1px;
+  width: 98%;
+  margin: auto;
+}

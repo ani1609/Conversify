@@ -1,3 +1,4 @@
+const { required } = require("joi");
 const mongoose = require("mongoose");
 
 const chatRoomSchema = new mongoose.Schema({
@@ -5,34 +6,10 @@ const chatRoomSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  creatorName: {
-    type: String,
-    required: true,
-  },
-  creatorEmail: {
-    type: String,
-    required: true,
-  },
   roomName: {
     type: String,
     required: true,
   },
-  roomMembers: [
-    {
-      userEmail: {
-        type: String,
-        required: true,
-      },
-      armoredPublicKey: {
-        type: String,
-        required: true,
-      },
-      joinTimestamp: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
   groupProfilePic: {
     type: String,
   },
@@ -40,18 +17,51 @@ const chatRoomSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  roomMembers: [
+    {
+      member: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      joinTimestamp: {
+        type: Date,
+        default: Date.now,
+      },
+      isAdmin: {
+        type: Boolean,
+        default: false,
+      },
+    },
+  ],
+  pastRoomMembers: [
+    {
+      member: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      leftTimestamp: {
+        type: Date,
+        default: Date.now,
+      },
+      removedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    },
+  ],
   chats: [
     {
-      senderName: {
-        type: String,
+      sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
-      },
-      senderEmail: {
-        type: String,
-        required: true,
-      },
-      senderProfilePic: {
-        type: String,
       },
       message: {
         type: String,
