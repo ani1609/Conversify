@@ -22,6 +22,7 @@ const createRoom = async (req, res) => {
     });
 
     await newRoom.save();
+
     res.status(201).json({ message: "Room created successfully" });
   } catch (error) {
     console.error("Error creating room:", error);
@@ -42,6 +43,7 @@ const joinRoom = async (req, res) => {
     const user = req.user;
 
     const room = await ChatRoom.findOne({ roomId: req.body.roomId });
+
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
     }
@@ -168,6 +170,7 @@ const getJoinedRoomsAdvancedDetails = async (req, res) => {
       .populate("roomMembers.member", "name email profilePic armoredPublicKey")
       .populate("chats.sender", "name email profilePic")
       .populate("pastRoomMembers.removedBy", "name");
+
     if (!room) {
       return res.status(404).json({ message: "No joined rooms found" });
     }
@@ -225,6 +228,7 @@ const uploadChat = async (req, res) => {
     const { roomId, message, timestamp } = req.body;
 
     const room = await ChatRoom.findOne({ roomId });
+
     if (!room) {
       return res.status(404).json({ message: "Chat room not found" });
     }
@@ -266,6 +270,7 @@ const leaveRoom = async (req, res) => {
       roomId,
       "roomMembers.member": user._id,
     });
+
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
     }
@@ -384,7 +389,7 @@ const dissmisAsAdmin = async (req, res) => {
 
     await room.save();
 
-    res.status(200).json({ message: "Member made admin successfully" });
+    res.status(200).json({ message: "Member dissmised as admin successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });

@@ -85,6 +85,7 @@ function RoomMembers(props) {
         config
       );
       console.log(response.data.message);
+      setOpenOptions({});
     } catch (error) {
       console.error("Error making admin:", error);
     }
@@ -113,6 +114,7 @@ function RoomMembers(props) {
         config
       );
       console.log(response.data.message);
+      setOpenOptions({});
     } catch (error) {
       console.error("Error dismissing as admin:", error);
     }
