@@ -120,6 +120,8 @@ function RoomMembers(props) {
     }
   };
 
+  console.log("the member are", roomMembers);
+
   return (
     <div className="room_members_parent">
       <div
@@ -139,8 +141,11 @@ function RoomMembers(props) {
           {roomMembers.map((member, index) => (
             <div key={index}>
               <li>
-                {member.ProfilePic ? (
-                  <img src={member.ProfilePic} alt="profile" />
+                {member.profilePic ? (
+                  <img
+                    src={`http://localhost:4000/${member.profilePic}`}
+                    alt="profile"
+                  />
                 ) : (
                   <Profile
                     className={
@@ -201,6 +206,7 @@ function RoomMembers(props) {
                     width: "100%",
                     height: "1px",
                     backgroundColor: "#D5D5D5",
+                    marginTop: "2px",
                   }}
                 ></div>
               )}

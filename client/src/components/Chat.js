@@ -352,24 +352,28 @@ function Chat(props) {
               }
             >
               <p onClick={handleCopyClick}>Copy RoomID</p>
-              <span
-                style={{
-                  backgroundColor: dark ? "#ededed" : "#000000",
-                }}
-              ></span>
-              <p
-                onClick={() =>
-                  setShowRoomMembersComponent(!showRoomMembersComponent)
-                }
-              >
-                Room Members
-              </p>
-              <span
-                style={{
-                  backgroundColor: dark ? "#ededed" : "#000000",
-                }}
-              ></span>
-              <p onClick={handleLeaveGroup}>Leave Group</p>
+              {!isRoomLeft && !isMemberRemovedData.isRemoved && (
+                <>
+                  <span
+                    style={{
+                      backgroundColor: dark ? "#ededed" : "#000000",
+                    }}
+                  ></span>
+                  <p
+                    onClick={() =>
+                      setShowRoomMembersComponent(!showRoomMembersComponent)
+                    }
+                  >
+                    Room Members
+                  </p>
+                  <span
+                    style={{
+                      backgroundColor: dark ? "#ededed" : "#000000",
+                    }}
+                  ></span>
+                  <p onClick={handleLeaveGroup}>Leave Group</p>
+                </>
+              )}
             </div>
           )}
         </div>
