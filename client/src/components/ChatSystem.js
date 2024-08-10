@@ -359,7 +359,7 @@ function ChatSystem(props) {
                               : "You have been removed from room"}
                           </p>
                         )}
-                        {room.isLeftRoom && (
+                        {room.isRoomLeft && (
                           <p
                             className={
                               dark
@@ -371,7 +371,7 @@ function ChatSystem(props) {
                           </p>
                         )}
                         {!room.lastMessage &&
-                          !room.isLeftRoom &&
+                          !room.isRoomLeft &&
                           !room.isRemovedFromRoom && (
                             <p
                               className={
@@ -384,7 +384,7 @@ function ChatSystem(props) {
                             </p>
                           )}
                         {room.lastMessage &&
-                          !room.isLeftRoom &&
+                          !room.isRoomLeft &&
                           !room.isRemovedFromRoom &&
                           room.lastMessage.message === undefined && (
                             <p
@@ -398,7 +398,7 @@ function ChatSystem(props) {
                             </p>
                           )}
                         {room.lastMessage &&
-                          !room.isLeftRoom &&
+                          !room.isRoomLeft &&
                           !room.isRemovedFromRoom &&
                           room.lastMessage.message !== undefined && (
                             <p
