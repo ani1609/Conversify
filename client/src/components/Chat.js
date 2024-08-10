@@ -264,6 +264,38 @@ function Chat(props) {
     });
   }, [socket, user]);
 
+  useEffect(() => {
+    socket.on("member_made_admin", (data) => {
+      const { userToMakeAdmin } = data;
+
+      console.log("member made admin", userToMakeAdmin.email);
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.map((member) =>
+          member.email === userToMakeAdmin.email
+            ? { ...member, isAdmin: true }
+            : member
+        )
+      );
+    });
+  }, [socket]);
+
+  useEffect(() => {
+    socket.on("member_dismissed_as_admin", (data) => {
+      const { userToDismissAsAdmin } = data;
+
+      console.log("dismissed as admin", userToDismissAsAdmin.email);
+
+      setRoomMembers((roomMembers) =>
+        roomMembers.map((member) =>
+          member.email === userToDismissAsAdmin.email
+            ? { ...member, isAdmin: false }
+            : member
+        )
+      );
+    });
+  }, [socket]);
+
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div

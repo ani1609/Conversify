@@ -62,6 +62,62 @@ function RoomMembers(props) {
     }));
   };
 
+  const handleMakeAdmin = async (userToMakeAdmin) => {
+    //write only the socket logic here
+    socket.emit("make_admin", {
+      roomId,
+      userToMakeAdmin,
+    });
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/chat/makeAdmin",
+        {
+          roomId,
+          userToMakeAdmin,
+        },
+        config
+      );
+      console.log(response.data.message);
+    } catch (error) {
+      console.error("Error making admin:", error);
+    }
+  };
+
+  const handleDismissAsAdmin = async (userToDismissAsAdmin) => {
+    //write only the socket logic here
+    socket.emit("dismiss_as_admin", {
+      roomId,
+      userToDismissAsAdmin,
+    });
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/api/chat/dismissAsAdmin",
+        {
+          roomId,
+          userToDismissAsAdmin,
+        },
+        config
+      );
+      console.log(response.data.message);
+    } catch (error) {
+      console.error("Error dismissing as admin:", error);
+    }
+  };
+
   return (
     <div className="room_members_parent">
       <div
@@ -123,7 +179,15 @@ function RoomMembers(props) {
                             backgroundColor: dark ? "#ededed" : "#000000",
                           }}
                         ></span>
-                        <p>Make admin</p>
+                        {member.isAdmin ? (
+                          <p onClick={() => handleDismissAsAdmin(member)}>
+                            Dismiss as admin
+                          </p>
+                        ) : (
+                          <p onClick={() => handleMakeAdmin(member)}>
+                            Make admin
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>

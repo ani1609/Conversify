@@ -327,6 +327,70 @@ const removeMember = async (req, res) => {
   }
 };
 
+const makeAdmin = async (req, res) => {
+  const { roomId, userToMakeAdmin } = req.body;
+
+  try {
+    const room = await ChatRoom.findOne({ roomId }).populate(
+      "roomMembers.member",
+      "email"
+    );
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const memberToMakeAdmin = room.roomMembers.find(
+      (member) => member.member.email === userToMakeAdmin.email
+    );
+
+    if (!memberToMakeAdmin) {
+      return res.status(404).json({ message: "Member not found in the room" });
+    }
+
+    memberToMakeAdmin.isAdmin = true;
+
+    await room.save();
+
+    res.status(200).json({ message: "Member made admin successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const dissmisAsAdmin = async (req, res) => {
+  const { roomId, userToDismissAsAdmin } = req.body;
+
+  try {
+    const room = await ChatRoom.findOne({ roomId }).populate(
+      "roomMembers.member",
+      "email"
+    );
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const memberToMakeAdmin = room.roomMembers.find(
+      (member) => member.member.email === userToDismissAsAdmin.email
+    );
+
+    if (!memberToMakeAdmin) {
+      return res.status(404).json({ message: "Member not found in the room" });
+    }
+
+    memberToMakeAdmin.isAdmin = false;
+
+    await room.save();
+
+    res.status(200).json({ message: "Member made admin successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const deleteChats = async (req, res) => {
   try {
     await ChatRoom.deleteMany({});
@@ -345,5 +409,7 @@ module.exports = {
   getChat,
   leaveRoom,
   removeMember,
+  makeAdmin,
+  dissmisAsAdmin,
   deleteChats,
 };

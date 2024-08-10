@@ -16,6 +16,8 @@ const {
   uploadChat,
   leaveRoom,
   removeMember,
+  makeAdmin,
+  dissmisAsAdmin,
   deleteChats,
 } = require("./controllers/chatRoomController");
 const {
@@ -58,6 +60,8 @@ app.post("/api/chat/joinRoom", authenticateJWT, joinRoom);
 app.post("/api/chat/uploadChat", authenticateJWT, uploadChat);
 app.post("/api/chat/leaveRoom", authenticateJWT, leaveRoom);
 app.post("/api/chat/removeMember", authenticateJWT, removeMember);
+app.post("/api/chat/makeAdmin", authenticateJWT, makeAdmin);
+app.post("/api/chat/dismissAsAdmin", authenticateJWT, dissmisAsAdmin);
 app.get(
   "/api/user/getJoinedRoomsBasicDetails",
   authenticateJWT,
@@ -204,6 +208,24 @@ io.on("connection", (socket) => {
         removerUser,
       });
     }
+  });
+
+  //Handle make admin
+  socket.on("make_admin", (data) => {
+    const { roomId, userToMakeAdmin } = data;
+
+    io.to(roomId).emit("member_made_admin", {
+      userToMakeAdmin,
+    });
+  });
+
+  //Handle dismiss as admin
+  socket.on("dismiss_as_admin", (data) => {
+    const { roomId, userToDismissAsAdmin } = data;
+
+    io.to(roomId).emit("member_dismissed_as_admin", {
+      userToDismissAsAdmin,
+    });
   });
 
   socket.on("disconnect", () => {
