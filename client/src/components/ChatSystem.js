@@ -131,49 +131,12 @@ function ChatSystem(props) {
     setShowChat(true);
   };
 
-  function formatTime(date) {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${formattedHours}:${formattedMinutes} ${ampm}`;
-  }
-
-  function isToday(date) {
-    const today = new Date();
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  }
-
-  // Function to check if a date is yesterday
-  function isYesterday(date) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return (
-      date.getDate() === yesterday.getDate() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getFullYear() === yesterday.getFullYear()
-    );
-  }
-
   const handleRoomsScroll = () => {
     if (roomsListRef.current.scrollTop > 10) {
       console.log("scrolled");
       setSearchShadow(true);
     } else {
       setSearchShadow(false);
-    }
-  };
-
-  const modifyLastMessage = (lastMsg) => {
-    if (lastMsg.length > 25) {
-      return lastMsg.slice(0, 25) + "...";
-    } else {
-      return lastMsg;
     }
   };
 
@@ -308,7 +271,11 @@ function ChatSystem(props) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <ul ref={roomsListRef} onScroll={handleRoomsScroll}>
+          <ul
+            ref={roomsListRef}
+            onScroll={handleRoomsScroll}
+            className="custom_scroll_bar"
+          >
             {joinedRooms
               .filter((room) =>
                 room.roomName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -346,7 +313,7 @@ function ChatSystem(props) {
                         >
                           {room.roomName}
                         </p>
-                        {room.isRemovedFromRoom && (
+                        {room.isRemovedFromRoom && !room.isRoomLeft && (
                           <p
                             className={
                               dark
@@ -359,7 +326,7 @@ function ChatSystem(props) {
                               : "You have been removed from room"}
                           </p>
                         )}
-                        {room.isRoomLeft && (
+                        {room.isRoomLeft && !room.isRemovedFromRoom && (
                           <p
                             className={
                               dark
@@ -370,66 +337,18 @@ function ChatSystem(props) {
                             You left the room
                           </p>
                         )}
-                        {!room.lastMessage &&
-                          !room.isRoomLeft &&
-                          !room.isRemovedFromRoom && (
-                            <p
-                              className={
-                                dark
-                                  ? "tap_to_chat dark_secondary-font"
-                                  : "tap_to_chat light_secondary-font"
-                              }
-                            >
-                              Tap to start chat
-                            </p>
-                          )}
-                        {room.lastMessage &&
-                          !room.isRoomLeft &&
-                          !room.isRemovedFromRoom &&
-                          room.lastMessage.message === undefined && (
-                            <p
-                              className={
-                                dark
-                                  ? "tap_to_chat dark_secondary-font"
-                                  : "tap_to_chat light_secondary-font"
-                              }
-                            >
-                              Tap to start chat
-                            </p>
-                          )}
-                        {room.lastMessage &&
-                          !room.isRoomLeft &&
-                          !room.isRemovedFromRoom &&
-                          room.lastMessage.message !== undefined && (
-                            <p
-                              className={
-                                dark
-                                  ? "last_message dark_secondary-font"
-                                  : "last_message light_secondary-font"
-                              }
-                            >
-                              {room.lastMessage.senderName}:{" "}
-                              {modifyLastMessage(room.lastMessage.message)}
-                            </p>
-                          )}
+                        {!room.isRoomLeft && !room.isRemovedFromRoom && (
+                          <p
+                            className={
+                              dark
+                                ? "tap_to_chat dark_secondary-font"
+                                : "tap_to_chat light_secondary-font"
+                            }
+                          >
+                            Tap to chat
+                          </p>
+                        )}
                       </div>
-                      {room.lastMessage?.timestamp && (
-                        <p
-                          className={
-                            dark
-                              ? "last_msg_timestamp dark_secondary-font"
-                              : "last_msg_timestamp light_secondary-font"
-                          }
-                        >
-                          {isToday(new Date(room.lastMessage.timestamp))
-                            ? formatTime(new Date(room.lastMessage.timestamp))
-                            : isYesterday(new Date(room.lastMessage.timestamp))
-                            ? "Yesterday"
-                            : new Date(
-                                room.lastMessage.timestamp
-                              ).toLocaleTimeString()}
-                        </p>
-                      )}
                     </div>
                   </li>
 

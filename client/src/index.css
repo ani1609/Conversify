@@ -71,3 +71,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+/* custom scroll bar  */
+.custom_scroll_bar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.custom_scroll_bar::-webkit-scrollbar {
+  width: 7px;
+  background-color: transparent;
+}
+
+.custom_scroll_bar::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: var(--primary);
+}

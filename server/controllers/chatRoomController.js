@@ -99,16 +99,16 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
 
     const simplifiedRooms = await Promise.all(
       rooms.map(async (room) => {
-        const lastChat =
-          room.chats.length > 0 ? room.chats[room.chats.length - 1] : null;
+        // const lastChat =
+        //   room.chats.length > 0 ? room.chats[room.chats.length - 1] : null;
 
-        let decryptedMessage = null;
-        if (lastChat && lastChat.message) {
-          decryptedMessage = await decryptMessage(
-            lastChat.message,
-            user.encryptedPrivateKey
-          );
-        }
+        // let decryptedMessage = null;
+        // if (lastChat && lastChat.message) {
+        //   decryptedMessage = await decryptMessage(
+        //     lastChat.message,
+        //     user.encryptedPrivateKey
+        //   );
+        // }
 
         const isLeft = room.pastRoomMembers.some(
           (memberObj) =>
@@ -126,13 +126,13 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
           roomId: room.roomId,
           roomName: room.roomName,
           groupProfilePic: room.groupProfilePic,
-          lastMessage: lastChat
-            ? {
-                senderName: lastChat.sender.name,
-                message: decryptedMessage,
-                timestamp: lastChat.timestamp,
-              }
-            : null,
+          // lastMessage: lastChat
+          //   ? {
+          //       senderName: lastChat.sender.name,
+          //       message: decryptedMessage,
+          //       timestamp: lastChat.timestamp,
+          //     }
+          //   : null,
           isRoomLeft: isLeft,
           isRemovedFromRoom: isRemoved,
           removerName: isRemoved ? removedMember.removedBy.name : null,
@@ -147,18 +147,18 @@ const getJoinedRoomsBasicDetails = async (req, res) => {
   }
 };
 
-async function decryptMessage(encryptedMessage, privateKey) {
-  try {
-    const { data: decrypted } = await openpgp.decrypt({
-      message: await openpgp.readMessage({ armoredMessage: encryptedMessage }),
-      decryptionKeys: await openpgp.readPrivateKey({ armoredKey: privateKey }),
-    });
-    return decrypted;
-  } catch (error) {
-    console.error("Error in decrypting message: ", error);
-    return undefined;
-  }
-}
+// async function decryptMessage(encryptedMessage, privateKey) {
+//   try {
+//     const { data: decrypted } = await openpgp.decrypt({
+//       message: await openpgp.readMessage({ armoredMessage: encryptedMessage }),
+//       decryptionKeys: await openpgp.readPrivateKey({ armoredKey: privateKey }),
+//     });
+//     return decrypted;
+//   } catch (error) {
+//     console.error("Error in decrypting message: ", error);
+//     return undefined;
+//   }
+// }
 
 const getJoinedRoomsAdvancedDetails = async (req, res) => {
   const roomId = req.query.roomId;
