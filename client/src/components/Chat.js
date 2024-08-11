@@ -91,7 +91,9 @@ function Chat(props) {
         });
       }
     });
+  }, [socket, roomMembers]);
 
+  useEffect(() => {
     socket.on("receive_message", async (data) => {
       console.log("received message", data);
       const decrypted = await decryptMessages(data.data.message);
@@ -111,7 +113,9 @@ function Chat(props) {
       );
       console.log(data.user.email, " left the room");
     });
+  }, [socket, user, decryptMessages]);
 
+  useEffect(() => {
     socket.on("member_removed", (data) => {
       const { removedUser, removerUser } = data;
 
@@ -132,7 +136,9 @@ function Chat(props) {
         });
       }
     });
+  }, [socket, user]);
 
+  useEffect(() => {
     socket.on("member_made_admin", (data) => {
       const { userToMakeAdmin } = data;
 
@@ -146,7 +152,9 @@ function Chat(props) {
         )
       );
     });
+  }, [socket, user, roomMembers]);
 
+  useEffect(() => {
     socket.on("member_dismissed_as_admin", (data) => {
       const { userToDismissAsAdmin } = data;
 
@@ -160,7 +168,7 @@ function Chat(props) {
         )
       );
     });
-  }, [socket, user, decryptMessages, roomMembers]);
+  }, [socket, user, roomMembers]);
 
   useEffect(() => {
     setMessages([]);
