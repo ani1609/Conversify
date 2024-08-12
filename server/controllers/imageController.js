@@ -1,49 +1,62 @@
+const path = require("path");
 const ChatRoom = require("../models/chatRoom");
 const fs = require("fs");
 
 const uploadProfilePic = async (req, res) => {
-  const user = req.user;
-  user.profilePic = req.file.path;
+  try {
+    const user = req.user;
+    user.profilePic = req.file.path;
 
-  await user.save();
+    await user.save();
 
-  res.status(201).json({ user });
+    res.status(201).json({ path: req.file.path });
+  } catch (error) {
+    console.error("Error uploading profile pic:", error);
+  }
 };
 
 const deleteProfilePic = async (req, res) => {
-  const user = req.user;
-  const filePath = user.profilePic;
+  try {
+    const user = req.user;
+    const filePath = user.profilePic;
 
-  fs.unlink(filePath, (error) => {
-    if (error) {
-      console.error("Error deleting file:", error);
-    } else {
-      console.log("File deleted successfully.");
-    }
-  });
+    fs.unlink(filePath, (error) => {
+      if (error) {
+        console.error("Error deleting file:", error);
+      } else {
+        console.log("File deleted successfully.");
+      }
+    });
 
-  user.profilePic = "";
-  await user.save();
+    user.profilePic = "";
+    await user.save();
 
-  res.status(201).json({ user });
+    res.status(201).json({ path: "" });
+  } catch (error) {
+    console.error("Error deleting profile pic:", error);
+  }
 };
 
 const addNewProfilePic = async (req, res) => {
-  const user = req.user;
-  const filePath = user.profilePic;
+  try {
+    const user = req.user;
+    const filePath = user.profilePic;
 
-  fs.unlink(filePath, (error) => {
-    if (error) {
-      console.error("Error deleting file:", error);
-    } else {
-      console.log("File deleted successfully.");
-    }
-  });
+    fs.unlink(filePath, (error) => {
+      if (error) {
+        console.error("Error deleting file:", error);
+      } else {
+        console.log("File deleted successfully.");
+      }
+    });
 
-  user.profilePic = req.file.path;
-  await user.save();
+    user.profilePic = req.file.path;
+    await user.save();
 
-  res.status(201).json({ user });
+    res.status(201).json({ path: req.file.path });
+  } catch (error) {
+    console.error("Error adding new profile pic:", error);
+  }
 };
 
 const uploadGroupProfilePic = async (req, res) => {
