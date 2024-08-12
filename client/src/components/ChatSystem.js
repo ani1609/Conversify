@@ -24,30 +24,41 @@ function ChatSystem(props) {
   const [searchQuery, setSearchQuery] = useState("");
   const roomsListRef = useRef(null);
   const [searchShadow, setSearchShadow] = useState(false);
-
-  const getJoinedRoomsBasicDetails = async (userToken) => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      };
-      const response = await axios.get(
-        "http://localhost:4000/api/user/getJoinedRoomsBasicDetails",
-        config
-      );
-      console.log(response.data.rooms);
-      setJoinedRooms(response.data.rooms);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  const [notifications, setNotifications] = useState({});
+  const [openedRoom, setOpenedRoom] = useState("");
 
   useEffect(() => {
-    if (userToken) {
+    const joinAllRooms = async (roomIds) => {
+      roomIds.forEach((roomId) => {
+        socket.emit("join_room", { roomId, user });
+        console.log("joined room ", roomId);
+      });
+    };
+
+    const getJoinedRoomsBasicDetails = async (userToken) => {
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        };
+        const response = await axios.get(
+          "http://localhost:4000/api/user/getJoinedRoomsBasicDetails",
+          config
+        );
+        console.log(response.data.rooms);
+        setJoinedRooms(response.data.rooms);
+        const roomIds = response.data.rooms.map((room) => room.roomId);
+        joinAllRooms(roomIds);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    if (userToken && user) {
       getJoinedRoomsBasicDetails(userToken);
     }
-  }, [userToken]);
+  }, [userToken, user]);
 
   const handleCreateRoom = async (e) => {
     e.preventDefault();
@@ -85,7 +96,6 @@ function ChatSystem(props) {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-    setShowChat(true);
     setShowCreateForm(false);
   };
 
@@ -113,11 +123,14 @@ function ChatSystem(props) {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-    setShowJoinForm(false);
-    setShowChat(true);
   };
 
   const handleRoomClick = (roomId, roomName) => {
+    setOpenedRoom(roomId);
+    setNotifications((prevNotifications) => ({
+      ...prevNotifications,
+      [roomId]: 0,
+    }));
     setRoomId(roomId);
     setRoomName(roomName);
     const groupProfilePic = joinedRooms.find(
@@ -127,7 +140,6 @@ function ChatSystem(props) {
 
     // getPublicKeys(roomId);
     socket.emit("join_room", { roomId: roomId, user });
-    setShowChat(false);
     setShowChat(true);
   };
 
@@ -139,6 +151,33 @@ function ChatSystem(props) {
       setSearchShadow(false);
     }
   };
+
+  //convert text to ...
+  const truncateText = (text, limit) => {
+    if (text.length > limit) {
+      return text.substring(0, limit) + "...";
+    } else {
+      return text;
+    }
+  };
+
+  useEffect(() => {
+    const handleNotification = (data) => {
+      console.log(`Received notification in room ${data.data.roomId}`);
+      if (data.data.roomId !== openedRoom) {
+        setNotifications((prevNotifications) => ({
+          ...prevNotifications,
+          [data.data.roomId]: (prevNotifications[data.data.roomId] || 0) + 1,
+        }));
+      }
+    };
+
+    socket.on("receive_notification", handleNotification);
+
+    return () => {
+      socket.off("receive_notification", handleNotification);
+    };
+  }, [openedRoom]);
 
   return (
     <div className="chatSystem_parent">
@@ -321,9 +360,10 @@ function ChatSystem(props) {
                                 : "tap_to_chat light_secondary-font"
                             }
                           >
-                            {room.removerName
-                              ? `${room.removerName} removed you from the room`
-                              : "You have been removed from room"}
+                            {truncateText(
+                              `${room.removerName} removed you from the room`,
+                              30
+                            )}
                           </p>
                         )}
                         {room.isRoomLeft && !room.isRemovedFromRoom && (
@@ -350,6 +390,17 @@ function ChatSystem(props) {
                         )}
                       </div>
                     </div>
+                    {notifications[room.roomId] > 0 && (
+                      <p
+                        className={
+                          dark
+                            ? "dark_notification_count"
+                            : "light_notification_count"
+                        }
+                      >
+                        {notifications[room.roomId]}
+                      </p>
+                    )}
                   </li>
 
                   <div
@@ -383,6 +434,7 @@ function ChatSystem(props) {
           user={user}
           socket={socket}
           roomId={roomId}
+          openedRoom={openedRoom}
           roomName={roomName}
           groupProfilePic={groupProfilePic}
         />

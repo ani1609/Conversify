@@ -1,6 +1,6 @@
 const ChatRoom = require("../models/chatRoom");
 require("dotenv").config();
-const openpgp = require("openpgp");
+// const openpgp = require("openpgp");
 
 const createRoom = async (req, res) => {
   try {

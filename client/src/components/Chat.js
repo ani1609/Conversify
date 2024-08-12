@@ -11,7 +11,7 @@ import { useTheme } from "./ThemeContext";
 import RoomMembers from "./RoomMembers";
 
 function Chat(props) {
-  const { user, socket, roomId, roomName, groupProfilePic } = props;
+  const { user, socket, roomId, roomName, groupProfilePic, openedRoom } = props;
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [plainText, setPlainText] = useState("");
   const [previousMessages, setPreviousMessages] = useState([]);
@@ -54,121 +54,142 @@ function Chat(props) {
 
   useEffect(() => {
     socket.on("join_room", (data) => {
-      console.log(data.user.name, " joined the chat");
+      if (openedRoom === data.roomId) {
+        console.log(data.user.name, "joined the chat");
 
-      // check if the user is already in the room and add with a timestamp if not present previously
-      const userInRoom = roomMembers.some(
-        (member) => member.email === data.user.email
-      );
-
-      if (!userInRoom) {
-        setPublicKeys((publicKeys) => [
-          ...publicKeys,
-          data.user.armoredPublicKey,
-        ]);
-
-        setRoomMembers((roomMembers) => {
-          const updatedRoomMembers = [
-            ...roomMembers,
-            {
-              email: data.user.email,
-              name: data.user.name,
-              profilePic: data.user.profilePic,
-              armoredPublicKey: data.user.armoredPublicKey,
-              isAdmin: false,
-              joinTimestamp: Date.now(),
-            },
-          ];
-
-          // Remove any duplicates
-          return updatedRoomMembers.filter(
-            (member, index, self) =>
-              index ===
-              self.findIndex(
-                (t) => t.email === member.email && t.name === member.name
-              )
+        // Ensure the user has a valid name and email
+        if (data.user.name && data.user.email) {
+          const userInRoom = roomMembers.some(
+            (member) => member.email === data.user.email
           );
-        });
+
+          if (!userInRoom) {
+            setPublicKeys((publicKeys) => [
+              ...publicKeys,
+              data.user.armoredPublicKey,
+            ]);
+
+            setRoomMembers((roomMembers) => {
+              const updatedRoomMembers = [
+                ...roomMembers,
+                {
+                  email: data.user.email,
+                  name: data.user.name,
+                  profilePic: data.user.profilePic,
+                  armoredPublicKey: data.user.armoredPublicKey,
+                  isAdmin: false,
+                  joinTimestamp: Date.now(),
+                },
+              ];
+
+              // Filter out members with missing name or email
+              const filteredRoomMembers = updatedRoomMembers.filter(
+                (member) => member.name && member.email
+              );
+
+              // Remove any duplicates
+              return filteredRoomMembers.filter(
+                (member, index, self) =>
+                  index ===
+                  self.findIndex(
+                    (t) => t.email === member.email && t.name === member.name
+                  )
+              );
+            });
+          }
+        }
       }
     });
-  }, [socket, roomMembers]);
+  }, [socket, roomMembers, openedRoom]);
 
   useEffect(() => {
     socket.on("receive_message", async (data) => {
-      console.log("received message", data);
-      const decrypted = await decryptMessages(data.data.message);
-      data.data.message = decrypted;
-      setMessages((messages) => [...messages, data.data]);
-    });
-
-    socket.on("room_left", (data) => {
-      if (data.user.email === user.email) {
-        setIsRoomLeft(true);
+      if (data.data.roomId === openedRoom) {
+        console.log("received message", data);
+        const decrypted = await decryptMessages(data.data.message);
+        data.data.message = decrypted;
+        setMessages((messages) => [...messages, data.data]);
       }
-      setPublicKeys((publicKeys) =>
-        publicKeys.filter((key) => key !== data.user.armoredPublicKey)
-      );
-      setRoomMembers((roomMembers) =>
-        roomMembers.filter((member) => member.email !== data.user.email)
-      );
-      console.log(data.user.email, " left the room");
     });
-  }, [socket, user, decryptMessages]);
+  }, [socket, user, decryptMessages, openedRoom]);
+
+  useEffect(() => {
+    socket.on("room_left", (data) => {
+      if (data.roomId === openedRoom) {
+        if (data.user.email === user.email) {
+          setIsRoomLeft(true);
+        }
+        setPublicKeys((publicKeys) =>
+          publicKeys.filter((key) => key !== data.user.armoredPublicKey)
+        );
+        setRoomMembers((roomMembers) =>
+          roomMembers.filter((member) => member.email !== data.user.email)
+        );
+        console.log(data.user.email, " left the room");
+      }
+    });
+  }, [socket, user, openedRoom]);
 
   useEffect(() => {
     socket.on("member_removed", (data) => {
-      const { removedUser, removerUser } = data;
+      if (data.roomId === openedRoom) {
+        const { removedUser, removerUser } = data;
 
-      console.log("member removed", removedUser.email);
+        console.log("member removed", removedUser.email);
 
-      setPublicKeys((publicKeys) =>
-        publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
-      );
+        setPublicKeys((publicKeys) =>
+          publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
+        );
 
-      setRoomMembers((roomMembers) =>
-        roomMembers.filter((member) => member.email !== removedUser.email)
-      );
+        setRoomMembers((roomMembers) =>
+          roomMembers.filter((member) => member.email !== removedUser.email)
+        );
 
-      if (removedUser.email === user.email) {
-        setIsMemberRemovedData({
-          isRemoved: true,
-          removerName: removerUser.name,
-        });
+        if (removedUser.email === user.email) {
+          setIsMemberRemovedData({
+            isRemoved: true,
+            removerName: removerUser.name,
+          });
+        }
       }
     });
-  }, [socket, user]);
+  }, [socket, user, openedRoom]);
 
   useEffect(() => {
     socket.on("member_made_admin", (data) => {
-      const { userToMakeAdmin } = data;
+      if (data.roomId === openedRoom) {
+        const { userToMakeAdmin } = data;
 
-      console.log("member made admin", userToMakeAdmin.email);
+        console.log("member made admin", userToMakeAdmin.email);
 
-      setRoomMembers((roomMembers) =>
-        roomMembers.map((member) =>
-          member.email === userToMakeAdmin.email
-            ? { ...member, isAdmin: true }
-            : member
-        )
-      );
+        setRoomMembers((roomMembers) =>
+          roomMembers.map((member) =>
+            member.email === userToMakeAdmin.email
+              ? { ...member, isAdmin: true }
+              : member
+          )
+        );
+      }
     });
-  }, [socket, user, roomMembers]);
+  }, [socket, user, roomMembers, openedRoom]);
 
   useEffect(() => {
     socket.on("member_dismissed_as_admin", (data) => {
-      const { userToDismissAsAdmin } = data;
+      if (data.roomId === openedRoom) {
+        const { userToDismissAsAdmin } = data;
 
-      console.log("dismissed as admin", userToDismissAsAdmin.email);
+        console.log("dismissed as admin", userToDismissAsAdmin.email);
 
-      setRoomMembers((roomMembers) =>
-        roomMembers.map((member) =>
-          member.email === userToDismissAsAdmin.email
-            ? { ...member, isAdmin: false }
-            : member
-        )
-      );
+        setRoomMembers((roomMembers) =>
+          roomMembers.map((member) =>
+            member.email === userToDismissAsAdmin.email
+              ? { ...member, isAdmin: false }
+              : member
+          )
+        );
+      }
     });
-  }, [socket, user, roomMembers]);
+  }, [socket, user, roomMembers, openedRoom]);
 
   useEffect(() => {
     setMessages([]);
@@ -244,6 +265,9 @@ function Chat(props) {
         senderProfilePic: user.profilePic ? user.profilePic : "",
         senderEmail: user.email,
         timestamp: Date.now(),
+      });
+      socket.emit("send_notification", {
+        roomId,
       });
       setPlainText("");
     }

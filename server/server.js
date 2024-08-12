@@ -110,17 +110,12 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("A user connected");
 
-  // Store the joined rooms for each user
-  const joinedRooms = [];
+  const joinedRooms = new Set(); // Use a Set to avoid duplicate rooms
 
   // Handle create room
   socket.on("create_room", (roomId) => {
-    // Leave all previously joined rooms
-    for (const room of joinedRooms) {
-      socket.leave(room);
-    }
     socket.join(roomId);
-    joinedRooms.push(roomId);
+    joinedRooms.add(roomId);
     console.log(`User created and joined a room: ${roomId}`);
   });
 
@@ -129,17 +124,17 @@ io.on("connection", (socket) => {
     // Attach user data to the socket
     socket.user = data.user;
 
-    // Leave all previously joined rooms
-    for (const room of joinedRooms) {
-      socket.leave(room);
-      console.log(`User left a room: ${room}`);
+    // Check if the user is already in the room
+    if (!joinedRooms.has(data.roomId)) {
+      socket.join(data.roomId);
+      joinedRooms.add(data.roomId);
+      socket.broadcast.to(data.roomId).emit("join_room", {
+        roomId: data.roomId,
+        user: data.user,
+        message: "has joined this room.",
+      });
+      console.log(`User joined a room: ${data.roomId}`);
     }
-    socket.join(data.roomId);
-    joinedRooms.push(data.roomId);
-    socket.broadcast
-      .to(data.roomId)
-      .emit("join_room", { user: data.user, message: "has joined this room." });
-    console.log(`User joined a room: ${data.roomId}`);
   });
 
   //handle send message
@@ -150,17 +145,17 @@ io.on("connection", (socket) => {
 
   // Handle leave room
   socket.on("leave_room", (data) => {
-    const roomIndex = joinedRooms.indexOf(data.roomId);
-    if (roomIndex !== -1) {
+    if (joinedRooms.has(data.roomId)) {
       // Notify all users, including the one who is leaving
       io.to(data.roomId).emit("room_left", {
+        roomId: data.roomId,
         user: data.user,
         message: `${data.user.name} has left the room.`,
       });
 
       // Leave the room
       socket.leave(data.roomId);
-      joinedRooms.splice(roomIndex, 1);
+      joinedRooms.delete(data.roomId);
       console.log(`User left room: ${data.roomId}`);
     }
   });
@@ -168,6 +163,13 @@ io.on("connection", (socket) => {
   // Handle remove member
   socket.on("remove_member", (data) => {
     const { roomId, removedUser, removerUser } = data;
+
+    // notifyying others even if the kicked user is not in the room (offline or something)
+    io.to(roomId).emit("member_removed", {
+      roomId,
+      removedUser,
+      removerUser,
+    });
 
     // Find the socket of the user to be removed
     const socketsInRoom = io.sockets.adapter.rooms.get(roomId) || new Set();
@@ -185,13 +187,7 @@ io.on("connection", (socket) => {
       }
     }
 
-    // notifyying others even if the kicked user is not in the room (offline or something)
-    io.to(roomId).emit("member_removed", {
-      removedUser,
-      removerUser,
-    });
-
-    console.log("user removed", removedUser);
+    console.log("user removed", removedUser.email);
   });
 
   //Handle make admin
@@ -199,6 +195,7 @@ io.on("connection", (socket) => {
     const { roomId, userToMakeAdmin } = data;
 
     io.to(roomId).emit("member_made_admin", {
+      roomId,
       userToMakeAdmin,
     });
   });
@@ -208,16 +205,21 @@ io.on("connection", (socket) => {
     const { roomId, userToDismissAsAdmin } = data;
 
     io.to(roomId).emit("member_dismissed_as_admin", {
+      roomId,
       userToDismissAsAdmin,
+    });
+  });
+
+  //handle notification
+  socket.on("send_notification", (data) => {
+    // broadcast to all users in the room except the sender
+    socket.broadcast.to(data.roomId).emit("receive_notification", {
+      data: data,
     });
   });
 
   socket.on("disconnect", () => {
     console.log("A user disconnected");
-    // Leave all previously joined rooms when a user disconnects
-    for (const room of joinedRooms) {
-      socket.leave(room);
-    }
   });
 });
 
