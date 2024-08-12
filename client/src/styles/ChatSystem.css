@@ -309,6 +309,12 @@
   transition: 0.15s ease-in-out;
 }
 
+.rooms_list ul li img {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+}
+
 .room_click {
   position: absolute;
   height: 100%;

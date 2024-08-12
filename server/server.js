@@ -24,6 +24,9 @@ const {
   uploadProfilePic,
   deleteProfilePic,
   addNewProfilePic,
+  uploadGroupProfilePic,
+  deleteGroupProfilePic,
+  addNewGroupProfilePic,
 } = require("./controllers/imageController");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -99,6 +102,19 @@ app.post(
   upload.single("profilePic"),
   addNewProfilePic
 );
+app.post(
+  "/api/uploadGroupProfilePic",
+  authenticateJWT,
+  upload.single("groupProfilePic"),
+  uploadGroupProfilePic
+);
+app.post("/api/deleteGroupProfilePic", authenticateJWT, deleteGroupProfilePic);
+app.post(
+  "/api/addNewGroupProfilePic",
+  authenticateJWT,
+  upload.single("groupProfilePic"),
+  addNewGroupProfilePic
+);
 
 const io = new Server(server, {
   cors: {
@@ -133,7 +149,7 @@ io.on("connection", (socket) => {
         user: data.user,
         message: "has joined this room.",
       });
-      console.log(`User joined a room: ${data.roomId}`);
+      console.dir(`${data.user.email} User joined a room: ${data.roomId}`);
     }
   });
 
@@ -207,6 +223,17 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("member_dismissed_as_admin", {
       roomId,
       userToDismissAsAdmin,
+    });
+  });
+
+  //handle room pic upload
+  socket.on("room_pic_uploading", (data) => {
+    const { roomId } = data;
+
+    console.log("room pic uploading", data);
+
+    io.to(roomId).emit("room_pic_uploaded", {
+      data: data,
     });
   });
 

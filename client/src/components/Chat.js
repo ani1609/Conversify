@@ -11,7 +11,7 @@ import { useTheme } from "./ThemeContext";
 import RoomMembers from "./RoomMembers";
 
 function Chat(props) {
-  const { user, socket, roomId, roomName, groupProfilePic, openedRoom } = props;
+  const { user, socket, roomId, roomName, openedRoom } = props;
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [plainText, setPlainText] = useState("");
   const [previousMessages, setPreviousMessages] = useState([]);
@@ -28,6 +28,8 @@ function Chat(props) {
   const messageBoxContainerRef = useRef(null);
   const [isRoomLeft, setIsRoomLeft] = useState(false);
   const [isMemberRemovedData, setIsMemberRemovedData] = useState({});
+  const [groupProfilePic, setGroupProfilePic] = useState("");
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
   useEffect(() => {
     // Scroll to the bottom of the chat container when messages change
@@ -53,9 +55,18 @@ function Chat(props) {
   );
 
   useEffect(() => {
+    if (roomMembers.length > 0) {
+      const userInRoom = roomMembers.some(
+        (member) => member.isAdmin && member.email === user.email
+      );
+      setIsUserAdmin(userInRoom);
+    }
+  }, [roomMembers, user]);
+
+  useEffect(() => {
     socket.on("join_room", (data) => {
       if (openedRoom === data.roomId) {
-        console.log(data.user.name, "joined the chat");
+        console.log(data, "joined the chat");
 
         // Ensure the user has a valid name and email
         if (data.user.name && data.user.email) {
@@ -217,6 +228,7 @@ function Chat(props) {
           isRemoved: response.data.room.isRemovedFromRoom,
           removerName: response.data.room.removerName,
         });
+        setGroupProfilePic(response.data.room.groupProfilePic);
         const decrypted = await Promise.all(
           response.data.room.chats.map((chat) => decryptMessages(chat.message))
         );
@@ -349,6 +361,94 @@ function Chat(props) {
     socket.emit("leave_room", { roomId, user });
   };
 
+  const handleUploadGroupPic = async (e) => {
+    const formData = new FormData();
+    formData.append("groupProfilePic", e.target.files[0]);
+    formData.append("roomId", roomId);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/uploadGroupProfilePic",
+        formData,
+        config
+      );
+      socket.emit("room_pic_uploading", {
+        roomId,
+        path: response.data.path,
+      });
+      console.log(response.data);
+      setGroupProfilePic(response.data.path);
+    } catch (error) {
+      console.error("Error uploading profile pic:", error);
+    }
+  };
+
+  const handleReUploadGroupPic = async (e) => {
+    const formData = new FormData();
+    formData.append("groupProfilePic", e.target.files[0]);
+    formData.append("roomId", roomId);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/addNewGroupProfilePic",
+        formData,
+        config
+      );
+      socket.emit("room_pic_uploading", {
+        roomId,
+        path: response.data.path,
+      });
+      console.log(response.data);
+      setGroupProfilePic(response.data.path);
+    } catch (error) {
+      console.error("Error re-uploading profile pic:", error);
+    }
+  };
+
+  const handleDeleteGroupPic = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/deleteGroupProfilePic",
+        {
+          roomId,
+        },
+        config
+      );
+      socket.emit("room_pic_uploading", {
+        roomId,
+        path: "",
+      });
+      console.log(response.data);
+      setGroupProfilePic("");
+    } catch (error) {
+      console.error("Error deleting group profile pic:", error);
+    }
+  };
+
+  useEffect(() => {
+    socket.on("room_pic_uploaded", (data) => {
+      if (data.data.roomId === openedRoom) {
+        console.log("room pic uploaded socket", data.data.path);
+        setGroupProfilePic(data.data.path);
+      }
+    });
+  }, [socket, openedRoom]);
+
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div
@@ -360,7 +460,12 @@ function Chat(props) {
         }}
       >
         <div className="group_header_left">
-          {!groupProfilePic && (
+          {groupProfilePic ? (
+            <img
+              src={`http://localhost:4000/${groupProfilePic}`}
+              alt="group_profile_pic"
+            />
+          ) : (
             <Group
               className={
                 dark ? "group_profile_pic_dark" : "group_profile_pic_light"
@@ -417,14 +522,49 @@ function Chat(props) {
                       setShowRoomMembersComponent(!showRoomMembersComponent)
                     }
                   >
-                    Room Members
+                    Room members
                   </p>
                   <span
                     style={{
                       backgroundColor: dark ? "#ededed" : "#000000",
                     }}
                   ></span>
-                  <p onClick={handleLeaveGroup}>Leave Group</p>
+                  {isUserAdmin &&
+                    (groupProfilePic ? (
+                      <label onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="file"
+                          style={{ display: "none" }}
+                          onChange={handleReUploadGroupPic}
+                        />
+                        Reupload group photo
+                      </label>
+                    ) : (
+                      <label onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="file"
+                          style={{ display: "none" }}
+                          onChange={handleUploadGroupPic}
+                        />
+                        Upload group photo
+                      </label>
+                    ))}
+                  {groupProfilePic && isUserAdmin && (
+                    <>
+                      <span
+                        style={{
+                          backgroundColor: dark ? "#ededed" : "#000000",
+                        }}
+                      ></span>
+                      <p onClick={handleDeleteGroupPic}>Delete group photo</p>
+                    </>
+                  )}
+                  <span
+                    style={{
+                      backgroundColor: dark ? "#ededed" : "#000000",
+                    }}
+                  ></span>
+                  <p onClick={handleLeaveGroup}>Leave group</p>
                 </>
               )}
             </div>
@@ -452,6 +592,7 @@ function Chat(props) {
             user={user}
             socket={socket}
             roomId={roomId}
+            isUserAdmin={isUserAdmin}
             setIsRoomLeft={setIsRoomLeft}
             roomMembers={roomMembers}
             setPublicKeys={setPublicKeys}
