@@ -299,13 +299,20 @@
 
 .rooms_list ul li {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 8px;
   height: 55px;
   padding: 5px 10px;
   cursor: pointer;
   position: relative;
   transition: 0.15s ease-in-out;
+}
+
+.rooms_list ul li img {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
 }
 
 .room_click {
@@ -339,7 +346,7 @@
 
 .grp_details {
   display: flex;
-  width: calc(100% - 60px);
+  width: calc(100% - 70px);
   justify-content: space-between;
   height: 100%;
   box-sizing: border-box;
@@ -406,4 +413,16 @@
 
 .default_asset_in_chat {
   width: 60%;
+}
+
+.dark_notification_count,
+.light_notification_count {
+  margin-left: auto;
+  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  background-color: var(--primary);
+  padding: 5px;
+  border-radius: 5px;
+  color: #d5d5d5;
 }

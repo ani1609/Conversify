@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import "../index.css";
 import "../styles/Navbar.css";
@@ -16,6 +16,13 @@ function Navbar(props) {
   const { dark, setDark } = useTheme();
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [profileDropDown, setProfileDropDown] = useState(false);
+  const [profilePic, setProfilePic] = useState("");
+
+  useEffect(() => {
+    if (user.email) {
+      setProfilePic(user.profilePic);
+    }
+  }, [user]);
 
   const handleSubmitPhoto = async (e) => {
     const formData = new FormData();
@@ -33,6 +40,7 @@ function Navbar(props) {
         config
       );
       console.log(response.data);
+      setProfilePic(response.data.path);
     } catch (error) {
       console.error("Error uploading profile pic:", error);
     }
@@ -48,11 +56,13 @@ function Navbar(props) {
           Authorization: `Bearer ${userToken}`,
         },
       };
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:4000/api/addNewProfilePic",
         formData,
         config
       );
+      console.log(response.data);
+      setProfilePic(response.data.path);
     } catch (error) {
       console.error("Error deleting photo:", error);
     }
@@ -67,11 +77,13 @@ function Navbar(props) {
         },
       };
       console.log(config);
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:4000/api/deleteProfilePic",
         {},
         config
       );
+      console.log(response.data);
+      setProfilePic("");
     } catch (error) {
       console.error("Error deleting photo:", error);
     }
@@ -137,66 +149,91 @@ function Navbar(props) {
             Sign up
           </li>
         )}
-        {userToken && user?.profilePic && (
+        {userToken && profilePic && (
           <li
+            onClick={() => setProfileDropDown(!profileDropDown)}
             className="profile_pic_wrapper"
             style={{
               borderBottom: dark
                 ? "1px solid rgb(78, 78, 78)"
                 : "1px solid rgb(165, 165, 165)",
             }}
-            onMouseEnter={() => setProfileDropDown(true)}
-            onMouseLeave={() => setProfileDropDown(false)}
           >
             <img
-              src={`http://localhost:4000/${user.profilePic}`}
+              src={`http://localhost:4000/${profilePic}`}
               alt="profile_pic"
             />
           </li>
         )}
-        {userToken && !user.profilePic && (
+        {userToken && !profilePic && (
           <li
+            onClick={() => setProfileDropDown(!profileDropDown)}
             className={
               dark
                 ? "profile_icon_wrapper dark_hover dark_border"
                 : "profile_icon_wrapper light_hover light_border"
             }
-            onMouseEnter={() => setProfileDropDown(true)}
-            onMouseLeave={() => setProfileDropDown(false)}
           >
             <Profile className="profile_icon" />
           </li>
         )}
       </ul>
       {profileDropDown && (
-        <ul
-          className="profile_dropdown"
-          onMouseEnter={() => setProfileDropDown(true)}
-          onMouseLeave={() => setProfileDropDown(false)}
-        >
-          {!user.profilePic && (
-            <li>
-              Upload DP
-              <input
-                type="file"
-                className="file-input"
-                onChange={handleSubmitPhoto}
-              />
-            </li>
-          )}
-          {user.profilePic && (
-            <li>
-              Reupload DP
-              <input
-                type="file"
-                className="file-input"
-                onChange={handleReuploadPhoto}
-              />
-            </li>
-          )}
-          {user.profilePic && <li onClick={handleDeleteDp}>Delete DP</li>}
-          <li onClick={handleLogout}>Log Out</li>
-        </ul>
+        <div className="profile_dropdown">
+          <ul>
+            {!profilePic && (
+              <li
+                style={{
+                  borderBottom: dark
+                    ? "1px solid #ededed"
+                    : "1px solid #000000",
+                }}
+              >
+                <label>
+                  Upload photo
+                  <input
+                    type="file"
+                    className="file-input"
+                    style={{ display: "none" }}
+                    onChange={handleSubmitPhoto}
+                  />
+                </label>
+              </li>
+            )}
+            {profilePic && (
+              <li
+                style={{
+                  borderBottom: dark
+                    ? "1px solid #ededed"
+                    : "1px solid #000000",
+                }}
+              >
+                <label>
+                  Reupload photo
+                  <input
+                    type="file"
+                    className="file-input"
+                    style={{ display: "none" }}
+                    onChange={handleReuploadPhoto}
+                  />
+                </label>
+              </li>
+            )}
+            {profilePic && (
+              <li
+                onClick={handleDeleteDp}
+                style={{
+                  borderBottom: dark
+                    ? "1px solid #ededed"
+                    : "1px solid #000000",
+                }}
+              >
+                Delete DP
+              </li>
+            )}
+            <li onClick={handleLogout}>Log Out</li>
+          </ul>
+        </div>
       )}
 
       {showLoginForm && (

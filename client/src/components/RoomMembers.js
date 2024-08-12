@@ -7,8 +7,14 @@ import { ReactComponent as Options } from "../icons/options.svg";
 import { useTheme } from "./ThemeContext";
 
 function RoomMembers(props) {
-  const { user, socket, roomId, roomMembers, setShowRoomMembersComponent } =
-    props;
+  const {
+    user,
+    socket,
+    roomId,
+    roomMembers,
+    isUserAdmin,
+    setShowRoomMembersComponent,
+  } = props;
   const { dark } = useTheme();
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [openOptions, setOpenOptions] = useState({});
@@ -50,10 +56,6 @@ function RoomMembers(props) {
       console.error("Error removing member:", error);
     }
   };
-
-  const isUserAdmin = roomMembers.some(
-    (member) => member.isAdmin && member.email === user.email
-  );
 
   const toggleOptions = (index) => {
     setOpenOptions((prev) => ({

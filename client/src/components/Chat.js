@@ -11,7 +11,7 @@ import { useTheme } from "./ThemeContext";
 import RoomMembers from "./RoomMembers";
 
 function Chat(props) {
-  const { user, socket, roomId, roomName, groupProfilePic } = props;
+  const { user, socket, roomId, roomName, openedRoom } = props;
   const userToken = JSON.parse(localStorage.getItem("chatUserToken"));
   const [plainText, setPlainText] = useState("");
   const [previousMessages, setPreviousMessages] = useState([]);
@@ -28,6 +28,8 @@ function Chat(props) {
   const messageBoxContainerRef = useRef(null);
   const [isRoomLeft, setIsRoomLeft] = useState(false);
   const [isMemberRemovedData, setIsMemberRemovedData] = useState({});
+  const [groupProfilePic, setGroupProfilePic] = useState("");
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
   useEffect(() => {
     // Scroll to the bottom of the chat container when messages change
@@ -53,122 +55,152 @@ function Chat(props) {
   );
 
   useEffect(() => {
-    socket.on("join_room", (data) => {
-      console.log(data.user.name, " joined the chat");
-
-      // check if the user is already in the room and add with a timestamp if not present previously
+    if (roomMembers.length > 0) {
       const userInRoom = roomMembers.some(
-        (member) => member.email === data.user.email
+        (member) => member.isAdmin && member.email === user.email
       );
+      setIsUserAdmin(userInRoom);
+    }
+  }, [roomMembers, user]);
 
-      if (!userInRoom) {
-        setPublicKeys((publicKeys) => [
-          ...publicKeys,
-          data.user.armoredPublicKey,
-        ]);
+  useEffect(() => {
+    socket.on("join_room", (data) => {
+      if (openedRoom === data.roomId) {
+        console.log(data, "joined the chat");
 
-        setRoomMembers((roomMembers) => {
-          const updatedRoomMembers = [
-            ...roomMembers,
-            {
-              email: data.user.email,
-              name: data.user.name,
-              profilePic: data.user.profilePic,
-              armoredPublicKey: data.user.armoredPublicKey,
-              isAdmin: false,
-              joinTimestamp: Date.now(),
-            },
-          ];
-
-          // Remove any duplicates
-          return updatedRoomMembers.filter(
-            (member, index, self) =>
-              index ===
-              self.findIndex(
-                (t) => t.email === member.email && t.name === member.name
-              )
+        // Ensure the user has a valid name and email
+        if (data.user.name && data.user.email) {
+          const userInRoom = roomMembers.some(
+            (member) => member.email === data.user.email
           );
-        });
+
+          if (!userInRoom) {
+            setPublicKeys((publicKeys) => [
+              ...publicKeys,
+              data.user.armoredPublicKey,
+            ]);
+
+            setRoomMembers((roomMembers) => {
+              const updatedRoomMembers = [
+                ...roomMembers,
+                {
+                  email: data.user.email,
+                  name: data.user.name,
+                  profilePic: data.user.profilePic,
+                  armoredPublicKey: data.user.armoredPublicKey,
+                  isAdmin: false,
+                  joinTimestamp: Date.now(),
+                },
+              ];
+
+              // Filter out members with missing name or email
+              const filteredRoomMembers = updatedRoomMembers.filter(
+                (member) => member.name && member.email
+              );
+
+              // Remove any duplicates
+              return filteredRoomMembers.filter(
+                (member, index, self) =>
+                  index ===
+                  self.findIndex(
+                    (t) => t.email === member.email && t.name === member.name
+                  )
+              );
+            });
+          }
+        }
       }
     });
-  }, [socket, roomMembers]);
+  }, [socket, roomMembers, openedRoom]);
 
   useEffect(() => {
     socket.on("receive_message", async (data) => {
-      console.log("received message", data);
-      const decrypted = await decryptMessages(data.data.message);
-      data.data.message = decrypted;
-      setMessages((messages) => [...messages, data.data]);
-    });
-
-    socket.on("room_left", (data) => {
-      if (data.user.email === user.email) {
-        setIsRoomLeft(true);
+      if (data.data.roomId === openedRoom) {
+        console.log("received message", data);
+        const decrypted = await decryptMessages(data.data.message);
+        data.data.message = decrypted;
+        setMessages((messages) => [...messages, data.data]);
       }
-      setPublicKeys((publicKeys) =>
-        publicKeys.filter((key) => key !== data.user.armoredPublicKey)
-      );
-      setRoomMembers((roomMembers) =>
-        roomMembers.filter((member) => member.email !== data.user.email)
-      );
-      console.log(data.user.email, " left the room");
     });
-  }, [socket, user, decryptMessages]);
+  }, [socket, user, decryptMessages, openedRoom]);
+
+  useEffect(() => {
+    socket.on("room_left", (data) => {
+      if (data.roomId === openedRoom) {
+        if (data.user.email === user.email) {
+          setIsRoomLeft(true);
+        }
+        setPublicKeys((publicKeys) =>
+          publicKeys.filter((key) => key !== data.user.armoredPublicKey)
+        );
+        setRoomMembers((roomMembers) =>
+          roomMembers.filter((member) => member.email !== data.user.email)
+        );
+        console.log(data.user.email, " left the room");
+      }
+    });
+  }, [socket, user, openedRoom]);
 
   useEffect(() => {
     socket.on("member_removed", (data) => {
-      const { removedUser, removerUser } = data;
+      if (data.roomId === openedRoom) {
+        const { removedUser, removerUser } = data;
 
-      console.log("member removed", removedUser.email);
+        console.log("member removed", removedUser.email);
 
-      setPublicKeys((publicKeys) =>
-        publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
-      );
+        setPublicKeys((publicKeys) =>
+          publicKeys.filter((key) => key !== removedUser.armoredPublicKey)
+        );
 
-      setRoomMembers((roomMembers) =>
-        roomMembers.filter((member) => member.email !== removedUser.email)
-      );
+        setRoomMembers((roomMembers) =>
+          roomMembers.filter((member) => member.email !== removedUser.email)
+        );
 
-      if (removedUser.email === user.email) {
-        setIsMemberRemovedData({
-          isRemoved: true,
-          removerName: removerUser.name,
-        });
+        if (removedUser.email === user.email) {
+          setIsMemberRemovedData({
+            isRemoved: true,
+            removerName: removerUser.name,
+          });
+        }
       }
     });
-  }, [socket, user]);
+  }, [socket, user, openedRoom]);
 
   useEffect(() => {
     socket.on("member_made_admin", (data) => {
-      const { userToMakeAdmin } = data;
+      if (data.roomId === openedRoom) {
+        const { userToMakeAdmin } = data;
 
-      console.log("member made admin", userToMakeAdmin.email);
+        console.log("member made admin", userToMakeAdmin.email);
 
-      setRoomMembers((roomMembers) =>
-        roomMembers.map((member) =>
-          member.email === userToMakeAdmin.email
-            ? { ...member, isAdmin: true }
-            : member
-        )
-      );
+        setRoomMembers((roomMembers) =>
+          roomMembers.map((member) =>
+            member.email === userToMakeAdmin.email
+              ? { ...member, isAdmin: true }
+              : member
+          )
+        );
+      }
     });
-  }, [socket, user, roomMembers]);
+  }, [socket, user, roomMembers, openedRoom]);
 
   useEffect(() => {
     socket.on("member_dismissed_as_admin", (data) => {
-      const { userToDismissAsAdmin } = data;
+      if (data.roomId === openedRoom) {
+        const { userToDismissAsAdmin } = data;
 
-      console.log("dismissed as admin", userToDismissAsAdmin.email);
+        console.log("dismissed as admin", userToDismissAsAdmin.email);
 
-      setRoomMembers((roomMembers) =>
-        roomMembers.map((member) =>
-          member.email === userToDismissAsAdmin.email
-            ? { ...member, isAdmin: false }
-            : member
-        )
-      );
+        setRoomMembers((roomMembers) =>
+          roomMembers.map((member) =>
+            member.email === userToDismissAsAdmin.email
+              ? { ...member, isAdmin: false }
+              : member
+          )
+        );
+      }
     });
-  }, [socket, user, roomMembers]);
+  }, [socket, user, roomMembers, openedRoom]);
 
   useEffect(() => {
     setMessages([]);
@@ -196,6 +228,7 @@ function Chat(props) {
           isRemoved: response.data.room.isRemovedFromRoom,
           removerName: response.data.room.removerName,
         });
+        setGroupProfilePic(response.data.room.groupProfilePic);
         const decrypted = await Promise.all(
           response.data.room.chats.map((chat) => decryptMessages(chat.message))
         );
@@ -244,6 +277,9 @@ function Chat(props) {
         senderProfilePic: user.profilePic ? user.profilePic : "",
         senderEmail: user.email,
         timestamp: Date.now(),
+      });
+      socket.emit("send_notification", {
+        roomId,
       });
       setPlainText("");
     }
@@ -325,6 +361,94 @@ function Chat(props) {
     socket.emit("leave_room", { roomId, user });
   };
 
+  const handleUploadGroupPic = async (e) => {
+    const formData = new FormData();
+    formData.append("groupProfilePic", e.target.files[0]);
+    formData.append("roomId", roomId);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/uploadGroupProfilePic",
+        formData,
+        config
+      );
+      socket.emit("room_pic_uploading", {
+        roomId,
+        path: response.data.path,
+      });
+      console.log(response.data);
+      setGroupProfilePic(response.data.path);
+    } catch (error) {
+      console.error("Error uploading profile pic:", error);
+    }
+  };
+
+  const handleReUploadGroupPic = async (e) => {
+    const formData = new FormData();
+    formData.append("groupProfilePic", e.target.files[0]);
+    formData.append("roomId", roomId);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/addNewGroupProfilePic",
+        formData,
+        config
+      );
+      socket.emit("room_pic_uploading", {
+        roomId,
+        path: response.data.path,
+      });
+      console.log(response.data);
+      setGroupProfilePic(response.data.path);
+    } catch (error) {
+      console.error("Error re-uploading profile pic:", error);
+    }
+  };
+
+  const handleDeleteGroupPic = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+      const response = await axios.post(
+        "http://localhost:4000/api/deleteGroupProfilePic",
+        {
+          roomId,
+        },
+        config
+      );
+      socket.emit("room_pic_uploading", {
+        roomId,
+        path: "",
+      });
+      console.log(response.data);
+      setGroupProfilePic("");
+    } catch (error) {
+      console.error("Error deleting group profile pic:", error);
+    }
+  };
+
+  useEffect(() => {
+    socket.on("room_pic_uploaded", (data) => {
+      if (data.data.roomId === openedRoom) {
+        console.log("room pic uploaded socket", data.data.path);
+        setGroupProfilePic(data.data.path);
+      }
+    });
+  }, [socket, openedRoom]);
+
   return (
     <div className={dark ? "chat_parent dark_bg" : "chat_parent light_bg"}>
       <div
@@ -336,7 +460,12 @@ function Chat(props) {
         }}
       >
         <div className="group_header_left">
-          {!groupProfilePic && (
+          {groupProfilePic ? (
+            <img
+              src={`http://localhost:4000/${groupProfilePic}`}
+              alt="group_profile_pic"
+            />
+          ) : (
             <Group
               className={
                 dark ? "group_profile_pic_dark" : "group_profile_pic_light"
@@ -393,14 +522,49 @@ function Chat(props) {
                       setShowRoomMembersComponent(!showRoomMembersComponent)
                     }
                   >
-                    Room Members
+                    Room members
                   </p>
                   <span
                     style={{
                       backgroundColor: dark ? "#ededed" : "#000000",
                     }}
                   ></span>
-                  <p onClick={handleLeaveGroup}>Leave Group</p>
+                  {isUserAdmin &&
+                    (groupProfilePic ? (
+                      <label onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="file"
+                          style={{ display: "none" }}
+                          onChange={handleReUploadGroupPic}
+                        />
+                        Reupload group photo
+                      </label>
+                    ) : (
+                      <label onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="file"
+                          style={{ display: "none" }}
+                          onChange={handleUploadGroupPic}
+                        />
+                        Upload group photo
+                      </label>
+                    ))}
+                  {groupProfilePic && isUserAdmin && (
+                    <>
+                      <span
+                        style={{
+                          backgroundColor: dark ? "#ededed" : "#000000",
+                        }}
+                      ></span>
+                      <p onClick={handleDeleteGroupPic}>Delete group photo</p>
+                    </>
+                  )}
+                  <span
+                    style={{
+                      backgroundColor: dark ? "#ededed" : "#000000",
+                    }}
+                  ></span>
+                  <p onClick={handleLeaveGroup}>Leave group</p>
                 </>
               )}
             </div>
@@ -428,6 +592,7 @@ function Chat(props) {
             user={user}
             socket={socket}
             roomId={roomId}
+            isUserAdmin={isUserAdmin}
             setIsRoomLeft={setIsRoomLeft}
             roomMembers={roomMembers}
             setPublicKeys={setPublicKeys}
