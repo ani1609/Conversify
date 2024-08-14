@@ -28,7 +28,7 @@ Before you begin, make sure you have the following software installed on your sy
 
 4. Start the server:
    - `nodemon server`
-   - `The server will start at localhost:3000`
+   - `The server will start at localhost:4000`
 
 6. Install client dependencies. In the project root directory, navigate to the client folder:
    - `cd ../client`
@@ -36,7 +36,7 @@ Before you begin, make sure you have the following software installed on your sy
 
 7. Start the client application:
    - `npm start`
-   - `(Press Enter again to confirm that the client application redirects to localhost:3001).`
+   - `The client will start at localhost:4000`
 
 
 ## Screenshots
