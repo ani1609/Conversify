@@ -37,7 +37,7 @@ const signup = async (req, res) => {
     }).save();
 
     const token = jwt.sign({ id: newUser._id }, SECRET_KEY, {
-      expiresIn: "5d",
+      expiresIn: "7d",
     });
     res.status(201).send({ user: newUser, token: token });
   } catch (error) {
