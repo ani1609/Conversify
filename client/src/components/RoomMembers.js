@@ -1,8 +1,8 @@
 import { useState } from "react";
 import "../styles/RoomMembers.css";
+import axios from "axios";
 import { ReactComponent as Profile } from "../icons/profile.svg";
 import { X } from "lucide-react";
-import axios from "axios";
 import { ReactComponent as Options } from "../icons/options.svg";
 import { useTheme } from "./ThemeContext";
 
